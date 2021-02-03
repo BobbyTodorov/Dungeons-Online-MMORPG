@@ -12,6 +12,18 @@ public class GameEngine {
     private static final StaticObjectsStorage staticObjectsStorage = StaticObjectsStorage.getInstance();
     private static final Map map = Map.getInstance(staticObjectsStorage);
 
+    private static GameEngine instance;
+
+    private GameEngine() {}
+
+    public static GameEngine getInstance() {
+        if (instance == null) {
+            instance = new GameEngine();
+        }
+
+        return instance;
+    }
+
     public String getMapToVisualize() {
         assert map != null;
         return map.getMap();

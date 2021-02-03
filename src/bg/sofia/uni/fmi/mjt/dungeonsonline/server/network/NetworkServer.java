@@ -1,10 +1,5 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.network;
 
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.Pair;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.gameengine.GameEngine;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.PlayersConnectionStorage;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -14,14 +9,12 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
 public class NetworkServer {
-
-    private static final int MAX_NUMBER_OF_PLAYERS_CONNECTED = 9;
 
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_HOST = "localhost";
@@ -32,10 +25,8 @@ public class NetworkServer {
     private static final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
 
     private boolean isRunning;
-    private static final GameEngine gameEngine = new GameEngine();
-    private static final PlayersConnectionStorage playersConnectionStorage = PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
 
-    private static final Queue<Pair<SocketChannel, String>> clientToRequest = new PriorityQueue<>();
+    private static final Queue<ClientRequest> clientRequests = new ArrayDeque<>();
 
 
     private NetworkServer() {}
@@ -95,7 +86,7 @@ public class NetworkServer {
 
     private void run() throws IOException {
         while (isRunning) {
-            if (selector.select() == 0) {
+            if (selector.select(200) == 0) {
                 continue;
             }
             Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
@@ -114,81 +105,46 @@ public class NetworkServer {
                 try {
                     clientInput = readFromClient(clientChannel);
                 } catch (SocketException e) {
-                    System.out.println(clientChannel.getRemoteAddress() + " disconnected");
-                    endClientSession(clientChannel);
+                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted; must be disconnected");
                 }
-
-                offerClientRequest(clientChannel, clientInput);
-//                if (clientInput == null) {
-//                    continue;
-//                }
-//                if (clientInput.equals("dc")) {
-//                    endClientSession(clientChannel);
-//                    continue;
-//                }
-//
-//                if (!playersConnectionStorage.isPlayerAlreadyConnected(clientChannel)) {
-//                    startClientSession(clientChannel);
-//                }
-//
-//                switch (clientInput) {
-//                    case "up" -> { gameEngine.moveHero(playersConnectionStorage.getPlayerHero(clientChannel), Direction.UP); }
-//                    case "down" -> { gameEngine.moveHero(playersConnectionStorage.getPlayerHero(clientChannel), Direction.DOWN); }
-//                    case "left" -> { gameEngine.moveHero(playersConnectionStorage.getPlayerHero(clientChannel), Direction.LEFT); }
-//                    case "right" -> { gameEngine.moveHero(playersConnectionStorage.getPlayerHero(clientChannel), Direction.RIGHT); }
-//                }
-//
-//                String map = gameEngine.getMapToVisualize();
-//                writeToAllClients(map, playersConnectionStorage.getPlayersSocketChannels());
-
+                if (clientInput != null) {
+                    addClientRequest(clientChannel, clientInput);
+                }
+                System.out.println(clientRequests.size());
             } else if (key.isAcceptable()) {
-                accept(selector, key);
+                accept(key);
             }
             keyIterator.remove();
         }
     }
 
-    public synchronized void offerClientRequest(SocketChannel clientChannel, String request) {
-        clientToRequest.add(new Pair<>(clientChannel, request));
+    public void addClientRequest(SocketChannel clientChannel, String request) {
+        clientRequests.offer(new ClientRequest(clientChannel, request));
     }
 
-    public synchronized Pair<SocketChannel, String> getClientRequest() {
-        return clientToRequest.poll();
+    public ClientRequest pollClientRequest() {
+        if (clientRequests.peek() != null) {
+            System.out.println(clientRequests.peek());
+        }
+        return clientRequests.poll();
     }
 
-    public void startClientSession(SocketChannel clientChannel) throws IOException {
-        writeToClient("Enter your name:", clientChannel);
-        String heroName;
-        do {
-            heroName = readFromClient(clientChannel);
-        } while (heroName == null);
-        Hero newHero = new Hero(heroName);
-        playersConnectionStorage.connectPlayer(clientChannel, newHero);
-        gameEngine.summonPlayerHero(newHero);
+    private void accept(SelectionKey key) throws IOException {
+        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+        SocketChannel clientSocketChannel = serverSocketChannel.accept();
+
+        clientSocketChannel.configureBlocking(false);
+        clientSocketChannel.register(selector, SelectionKey.OP_READ);
+
+        System.out.println("Connection accepted from client " + clientSocketChannel.getRemoteAddress());
     }
 
-    public void endClientSession(SocketChannel clientChannel) throws IOException {
-        gameEngine.unSummonPlayerHero(playersConnectionStorage.getPlayerHero(clientChannel));
-        playersConnectionStorage.disconnectPlayer(clientChannel);
-        clientChannel.close();
-    }
-
-    private void accept(Selector selector, SelectionKey key) throws IOException {
-        ServerSocketChannel sockChannel = (ServerSocketChannel) key.channel();
-        SocketChannel accept = sockChannel.accept();
-
-        accept.configureBlocking(false);
-        accept.register(selector, SelectionKey.OP_READ);
-
-        System.out.println("Connection accepted from client " + accept.getRemoteAddress());
-    }
-
-    private String readFromClient(SocketChannel clientChannel) throws IOException {
+    public String readFromClient(SocketChannel clientChannel) throws IOException {
         buffer.clear();
         if (clientChannel.read(buffer) == 0) {
             return null;
         }
-        if (clientChannel.read(buffer) == -1) {
+        if (clientChannel.read(buffer) == -1) { //TODO
             return "disconnected";
         }
 
@@ -201,7 +157,7 @@ public class NetworkServer {
         return readString.trim();
     }
 
-    private void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
+    public void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
         buffer.clear();
         buffer.put(msg.getBytes());
         buffer.flip();
@@ -210,7 +166,7 @@ public class NetworkServer {
         clientSocketChannel.write(buffer);
     }
 
-    private void writeToAllClients(String msg, Set<SocketChannel> clientSocketChannels) throws IOException {
+    public void writeToAllClients(String msg, Set<SocketChannel> clientSocketChannels) throws IOException {
         for (SocketChannel clientSocketChannel : clientSocketChannels) {
             writeToClient(msg, clientSocketChannel);
         }
