@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.BaseActor;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Position;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Position;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
@@ -147,5 +147,18 @@ public final class Hero extends BaseActor implements IHero {
     @Override
     public char getSymbolToVisualizeOnMap() {
         return (char) (symbolToVisualize + '0');
+    }
+
+    @Override
+    public String toString() {
+        return "Hero " + getSymbolToVisualizeOnMap() +
+            " {name=" + name +
+            ", level=" + level +
+            ", stats=" + stats +
+            ", weapon=" + weapon +
+            ", spell=" + spell +
+            //TODO ", backpack=" + backpack +
+            ", experience=" + experience +
+            '}';
     }
 }

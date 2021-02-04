@@ -9,7 +9,9 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion.PotionSize;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Weapon;
 
+import javax.xml.validation.Validator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public final class StaticObjectsStorage {
@@ -19,14 +21,12 @@ public final class StaticObjectsStorage {
     private static final int NUMBER_OF_EASY_MINIONS = 4;
     private static final int NUMBER_OF_MEDIUM_MINIONS = 3;
     private static final int NUMBER_OF_HARD_MINIONS = 2;
-    private static final int NUMBER_OF_EXTREME_MINIONS = 1;
     private static final int TOTAL_NUMBER_OF_MINIONS;
     static {
         TOTAL_NUMBER_OF_MINIONS =
             NUMBER_OF_EASY_MINIONS
             + NUMBER_OF_MEDIUM_MINIONS
-            + NUMBER_OF_HARD_MINIONS
-            + NUMBER_OF_EXTREME_MINIONS;
+            + NUMBER_OF_HARD_MINIONS;
     }
 
     private static final int NUMBER_OF_REGULAR_HEALTH_POTIONS = 4;
@@ -75,15 +75,18 @@ public final class StaticObjectsStorage {
     }
 
     private final List<Minion> minions;
-    private int beatenEnemies;
+    private static int beatenMinions;
     private final List<Treasure> treasures;
-    private int takenTreasures;
+    private static int takenTreasures;
 
     private StaticObjectsStorage() {
         minions = new ArrayList<>(TOTAL_NUMBER_OF_MINIONS);
         initializeMinions();
+        Collections.shuffle(minions);
+
         treasures = new ArrayList<>(TOTAL_NUMBER_OF_TREASURES);
         initializeTreasures();
+        Collections.shuffle(treasures);
     }
 
     public static StaticObjectsStorage getInstance() {
@@ -94,6 +97,10 @@ public final class StaticObjectsStorage {
         return instance;
     }
 
+    public void addTreasure(Treasure treasure) {
+        treasures.add(0, treasure);
+    }
+
     public List<Minion> getMinions() {
         return minions;
     }
@@ -102,13 +109,16 @@ public final class StaticObjectsStorage {
         return treasures;
     }
 
-    //TODO adds/removes
+    public Treasure getTreasure() { return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES)); }
+
+    public Minion getMinion() {
+        return minions.get((beatenMinions++ % TOTAL_NUMBER_OF_TREASURES));
+    }
 
     private void initializeMinions() {
         initializeEasyMinions();
         initializeMediumMinions();
         initializeHardMinions();
-        initializeExtremeMinions();
     }
 
     private void initializeEasyMinions() {
@@ -129,11 +139,6 @@ public final class StaticObjectsStorage {
         }
     }
 
-    private void initializeExtremeMinions() {
-        for (int i = 0; i < NUMBER_OF_EXTREME_MINIONS; ++i) {
-            minions.add(Minion.createMinionByDifficultyLevel(MinionDifficultyLevel.EXTREME));
-        }
-    }
 
     private void initializeTreasures() {
         initializePotions();

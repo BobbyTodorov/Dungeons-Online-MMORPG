@@ -23,6 +23,14 @@ public final class Spell extends BaseSkill{
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.learn(this);
-        return "Spell found! Damage points: " + this.getDamage() + ", Mana cost: " + getManaCost();
+        return "Spell " + this.name + " Level: " + this.level + " Damage points: " + this.getDamage() + ", Mana cost: " + getManaCost();
+    }
+
+    @Override
+    public String toString() {
+        return "Spell{" +
+            super.toString() +
+            " MANA_COST=" + MANA_COST +
+            '}';
     }
 }

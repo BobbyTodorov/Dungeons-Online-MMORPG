@@ -20,9 +20,27 @@ public final class Backpack {
         treasures.add(treasureToAdd);
     }
 
-    public void removeTreasure(Treasure treasureToRemove) {
-        ArgumentValidator.checkForNullArguments(treasureToRemove);
+    public Treasure getTreasureAt(int index) {
+        ArgumentValidator.checkForNonNegativeArguments(index);
 
-        treasures.remove(treasureToRemove);
+        return treasures.remove(index);
+    }
+
+    public int size() {
+        return treasures.size();
+    }
+
+    public void removeTreasure(Treasure treasure) {
+        treasures.remove(treasure);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder resultString = new StringBuilder("Backpack:\n");
+        int treasuresCounter = 1;
+        for (Treasure treasure : treasures) {
+            resultString.append(treasuresCounter++).append(": ").append(treasure).append('\n');
+        }
+        return resultString.toString();
     }
 }

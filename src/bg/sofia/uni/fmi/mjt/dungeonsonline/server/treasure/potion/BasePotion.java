@@ -14,4 +14,9 @@ public abstract class BasePotion implements Potion{
     public int heal(){
         return POINTS_TO_HEAL;
     }
+
+    @Override
+    public String toString() {
+        return "Healing Points=" + POINTS_TO_HEAL;
+    }
 }

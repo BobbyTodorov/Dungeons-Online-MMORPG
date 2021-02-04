@@ -24,11 +24,15 @@ public final class ManaPotion extends BasePotion{
         }
     }
 
-
     public String collect(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.takeMana(this.heal());
-        return "Mana potion found! " + this.heal() + " mana points added to your hero!";
+        return this.heal() + " mana points added to your hero!";
+    }
+
+    @Override
+    public String toString() {
+        return "Mana Potion{" + super.toString() + "}";
     }
 }

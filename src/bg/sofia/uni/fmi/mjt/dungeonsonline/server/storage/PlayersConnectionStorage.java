@@ -56,4 +56,13 @@ public class PlayersConnectionStorage {
     public boolean isPlayerAlreadyConnected(SocketChannel socketChannel) {
         return playersSocketChannelToHero.containsKey(socketChannel);
     }
+
+    public Hero getPlayerHeroByHeroSymbol(char heroSymbol) {
+        return playersSocketChannelToHero.values().stream()
+            .filter(h -> h.getSymbolToVisualizeOnMap() == heroSymbol)
+            .reduce((a, b) -> {
+                throw new IllegalStateException("Multiple elements: " + a + ", " + b);
+            })
+            .orElse(null);
+    }
 }

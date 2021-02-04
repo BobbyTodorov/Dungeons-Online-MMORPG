@@ -7,6 +7,8 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public abstract class BaseActor implements Actor {
 
+    private final static int HAND_DAMAGE = 10;
+
     protected String name;
     protected int level;
     protected Stats stats;
@@ -58,14 +60,14 @@ public abstract class BaseActor implements Actor {
 
     @Override
     public int attack() {
-        int weaponDamage = 0;
-        int spellDamage = 0;
+        int weaponDamage = stats.getAttack();
+        int spellDamage = stats.getAttack();
 
         if (getWeapon() != null) {
-            weaponDamage = getWeapon().getDamage() + stats.getAttack();
+            weaponDamage += getWeapon().getDamage();
         }
         if (getSpell() != null) {
-            spellDamage = getSpell().getDamage() + stats.getAttack();
+            spellDamage += getSpell().getDamage();
         }
 
         return (spellDamage > weaponDamage && castSpell(getSpell())) ? spellDamage : weaponDamage;

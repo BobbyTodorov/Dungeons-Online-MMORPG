@@ -88,4 +88,13 @@ public final class Stats {
 
         defensePoints += amountOfDefensePoints;
     }
+
+    @Override
+    public String toString() {
+        return "health=" + currentHealthPoints + "/" + maxHealthPoints +
+            ", mana=" + currentManaPoints + "/" + maxManaPoints +
+            ", attackPoints=" + attackPoints +
+            ", defensePoints=" + defensePoints +
+            '}';
+    }
 }

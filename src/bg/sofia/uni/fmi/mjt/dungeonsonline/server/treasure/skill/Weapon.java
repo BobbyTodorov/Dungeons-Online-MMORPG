@@ -14,6 +14,6 @@ public final class Weapon extends BaseSkill{
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.equip(this);
-        return "Weapon found! Damage points: " + this.getDamage();
+        return "Weapon " + this.name + " Level: " + this.level + " Damage points: " + this.getDamage();
     }
 }

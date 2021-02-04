@@ -21,8 +21,6 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
     private final static int START_ATTACK_POINTS = 10;
     private final static int START_DEFENSE_POINTS = 10;
 
-    private final static char SYMBOL_TO_VISUALIZE_ON_MAP = 'M';
-
     public Minion(String name, int level, Weapon weapon, Spell spell, Stats stats) {
         super(name);
 
@@ -42,7 +40,6 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
             case EASY -> { return createEasyMinion(); }
             case MEDIUM -> { return createMediumMinion(); }
             case HARD -> { return createHardMinion(); }
-            case EXTREME -> { return createExtremeMinion(); }
             default -> { return null; }
         }
     }
@@ -66,13 +63,6 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
         return new Minion("hard minion", 5, hardWeapon, hardSpell, calcStatsByLevel(minionLevel));
     }
 
-    private static Minion createExtremeMinion() {
-        int minionLevel = 10;
-        Weapon extremeWeapon = new Weapon("extreme weapon", 150, minionLevel);
-        Spell extremeSpell = new Spell("extreme spell", 200, minionLevel, 100);
-        return new Minion("extreme minion", 10, extremeWeapon, extremeSpell, calcStatsByLevel(minionLevel));
-    }
-
     @Override
     public int giveExperience() {
         return level * EXPERIENCE_TO_GIVE_PER_LEVEL;
@@ -88,7 +78,13 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
     }
 
     @Override
-    public char getSymbolToVisualizeOnMap() {
-        return SYMBOL_TO_VISUALIZE_ON_MAP;
+    public String toString() {
+        return "Minion{" +
+            "name='" + name + '\'' +
+            ", level=" + level +
+            ", stats=" + stats +
+            ", weapon=" + weapon +
+            ", spell=" + spell +
+            '}';
     }
 }

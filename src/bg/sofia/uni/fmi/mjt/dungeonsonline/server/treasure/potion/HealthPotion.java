@@ -29,6 +29,11 @@ public final class HealthPotion extends BasePotion {
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.takeHealing(this.heal());
-        return "Health potion found! " + this.heal() + " health points added to your hero!";
+        return this.heal() + " health points added to your hero!";
+    }
+
+    @Override
+    public String toString() {
+        return "Health Potion{" + super.toString() + "}";
     }
 }

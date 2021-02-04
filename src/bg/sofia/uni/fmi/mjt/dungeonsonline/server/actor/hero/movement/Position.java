@@ -1,6 +1,5 @@
-package bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes;
+package bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement;
 
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.movement.Direction;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
 
 public class Position {

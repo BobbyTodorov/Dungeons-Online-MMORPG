@@ -31,4 +31,11 @@ public abstract class BaseSkill implements Skill {
     public int getLevel() {
         return level;
     }
+
+    @Override
+    public String toString() {
+        return "name='" + name +
+            ", damage=" + damage +
+            ", level=" + level;
+    }
 }

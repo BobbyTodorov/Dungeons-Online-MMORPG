@@ -13,6 +13,7 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class NetworkServer {
 
@@ -26,7 +27,7 @@ public class NetworkServer {
 
     private boolean isRunning;
 
-    private static final Queue<ClientRequest> clientRequests = new ArrayDeque<>();
+    private final Queue<ClientRequest> clientRequests = new LinkedBlockingQueue<>();
 
 
     private NetworkServer() {}
@@ -41,6 +42,13 @@ public class NetworkServer {
         return instance;
     }
 
+    public void addClientRequest(SocketChannel clientChannel, String request) {
+        clientRequests.add(new ClientRequest(clientChannel, request));
+    }
+
+    public ClientRequest pollClientRequest() {
+        return clientRequests.poll();
+    }
 
     public void start() {
         try {
@@ -86,7 +94,7 @@ public class NetworkServer {
 
     private void run() throws IOException {
         while (isRunning) {
-            if (selector.select(200) == 0) {
+            if (selector.select() == 0) {
                 continue;
             }
             Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
@@ -101,32 +109,22 @@ public class NetworkServer {
             if (key.isReadable()) {
                 SocketChannel clientChannel = (SocketChannel) key.channel();
 
-                String clientInput = null;
+                String clientInput;
                 try {
                     clientInput = readFromClient(clientChannel);
                 } catch (SocketException e) {
-                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted; must be disconnected");
+                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted");
+                    //TODO endSession somehow
+                    continue;
                 }
                 if (clientInput != null) {
                     addClientRequest(clientChannel, clientInput);
                 }
-                System.out.println(clientRequests.size());
             } else if (key.isAcceptable()) {
                 accept(key);
             }
             keyIterator.remove();
         }
-    }
-
-    public void addClientRequest(SocketChannel clientChannel, String request) {
-        clientRequests.offer(new ClientRequest(clientChannel, request));
-    }
-
-    public ClientRequest pollClientRequest() {
-        if (clientRequests.peek() != null) {
-            System.out.println(clientRequests.peek());
-        }
-        return clientRequests.poll();
     }
 
     private void accept(SelectionKey key) throws IOException {
