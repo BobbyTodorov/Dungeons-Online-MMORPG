@@ -11,9 +11,9 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public final class Hero extends BaseActor implements IHero {
 
-    private final static int START_HEALTH_POINTS = 100;
+    private final static int START_HEALTH_POINTS = 1;
     private final static int START_MANA_POINTS = 100;
-    private final static int START_ATTACK_POINTS = 50;
+    private final static int START_ATTACK_POINTS = 1;
     private final static int START_DEFENSE_POINTS = 50;
     private final static int START_LEVEL = 1;
     private final static Weapon START_WEAPON = null;
@@ -46,7 +46,7 @@ public final class Hero extends BaseActor implements IHero {
     }
 
     @Override
-    public Backpack getBackpack() {
+    public Backpack backpack() {
         return backpack;
     }
 

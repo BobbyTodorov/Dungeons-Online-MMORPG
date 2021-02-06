@@ -10,7 +10,7 @@ public interface IHero extends Actor {
     /**
      * @return Hero's backpack.
      */
-    Backpack getBackpack();
+    Backpack backpack();
 
     /**
      * Hero gains given amount of experience.

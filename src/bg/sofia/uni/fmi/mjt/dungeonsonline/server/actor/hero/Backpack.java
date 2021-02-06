@@ -20,19 +20,20 @@ public final class Backpack {
         treasures.add(treasureToAdd);
     }
 
-    public Treasure getTreasureAt(int index) {
+    public Treasure remove(int index) {
         ArgumentValidator.checkForNonNegativeArguments(index);
 
         return treasures.remove(index);
+    }
+
+    public void remove(Treasure treasure) {
+        treasures.remove(treasure);
     }
 
     public int size() {
         return treasures.size();
     }
 
-    public void removeTreasure(Treasure treasure) {
-        treasures.remove(treasure);
-    }
 
     @Override
     public String toString() {

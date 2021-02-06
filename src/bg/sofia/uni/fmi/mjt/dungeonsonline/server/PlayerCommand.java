@@ -1,6 +1,6 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server;
 
-public enum PlayerCommands {
+public enum PlayerCommand {
     START("start"),
     DISCONNECT("disconnect"),
     UP("up"),
@@ -18,16 +18,16 @@ public enum PlayerCommands {
 
     private final String actual;
 
-    PlayerCommands(String actual) {
+    PlayerCommand(String actual) {
         this.actual = actual;
     }
 
-    public String getActual() {
+    public String toString() {
         return this.actual;
     }
 
-    public static PlayerCommands fromString(String commandAsString) {
-        for (PlayerCommands command : PlayerCommands.values()) {
+    public static PlayerCommand fromString(String commandAsString) {
+        for (PlayerCommand command : PlayerCommand.values()) {
             if (command.actual.equalsIgnoreCase(commandAsString)) {
                 return command;
             }

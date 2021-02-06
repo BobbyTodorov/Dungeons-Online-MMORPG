@@ -9,10 +9,8 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class NetworkServer {
@@ -27,7 +25,8 @@ public class NetworkServer {
 
     private boolean isRunning;
 
-    private final Queue<ClientRequest> clientRequests = new LinkedBlockingQueue<>();
+    private final Queue<ClientRequest> receivedClientRequests = new LinkedBlockingQueue<>();
+    private final Queue<ClientRequest> toSendClientRequests = new LinkedBlockingQueue<>();
 
 
     private NetworkServer() {}
@@ -42,12 +41,16 @@ public class NetworkServer {
         return instance;
     }
 
-    public void addClientRequest(SocketChannel clientChannel, String request) {
-        clientRequests.add(new ClientRequest(clientChannel, request));
+    public void addReceivedClientRequest(SocketChannel clientChannel, String request) {
+        receivedClientRequests.add(new ClientRequest(clientChannel, request));
+    }
+
+    public void addToSendClientRequest(SocketChannel clientChannel, String request) {
+        toSendClientRequests.add(new ClientRequest(clientChannel, request));
     }
 
     public ClientRequest pollClientRequest() {
-        return clientRequests.poll();
+        return receivedClientRequests.poll();
     }
 
     public void start() {
@@ -92,18 +95,32 @@ public class NetworkServer {
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
-    private void run() throws IOException {
-        while (isRunning) {
-            if (selector.select() == 0) {
-                continue;
-            }
-            Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+    private void run() {
+        Thread clientRequestsReceiver = new Thread(this::receiveClientRequests);
+        Thread clientRequestsSender = new Thread()
 
-            operateSocketChannels(keyIterator);
+    }
+
+    private void sendClientRequests() {
+        
+    }
+
+    private void receiveClientRequests() {
+        try {
+            while (isRunning) {
+                if (selector.select() == 0) {
+                    continue;
+                }
+                Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+
+                receiveSocketChannelsClientRequests(keyIterator);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("server receiving interrupted", e); //TODO proper exceptions
         }
     }
 
-    private void operateSocketChannels(Iterator<SelectionKey> keyIterator) throws IOException {
+    private void receiveSocketChannelsClientRequests(Iterator<SelectionKey> keyIterator) throws IOException {
         while (keyIterator.hasNext()) {
             SelectionKey key = keyIterator.next();
             if (key.isReadable()) {
@@ -113,12 +130,12 @@ public class NetworkServer {
                 try {
                     clientInput = readFromClient(clientChannel);
                 } catch (SocketException e) {
-                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted");
-                    //TODO endSession somehow
+                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted in NetworkServer");
+                    clientChannel.close();
                     continue;
                 }
                 if (clientInput != null) {
-                    addClientRequest(clientChannel, clientInput);
+                    addReceivedClientRequest(clientChannel, clientInput);
                 }
             } else if (key.isAcceptable()) {
                 accept(key);
@@ -139,12 +156,10 @@ public class NetworkServer {
 
     public String readFromClient(SocketChannel clientChannel) throws IOException {
         buffer.clear();
-        if (clientChannel.read(buffer) == 0) {
+        if (clientChannel.read(buffer) < 0) {
             return null;
         }
-        if (clientChannel.read(buffer) == -1) { //TODO
-            return "disconnected";
-        }
+        //had -1 check
 
         buffer.flip();
         byte[] clientInputBytes = new byte[buffer.remaining()];
@@ -162,11 +177,5 @@ public class NetworkServer {
         System.out.println("Sending message to client: ");
         System.out.println(msg);
         clientSocketChannel.write(buffer);
-    }
-
-    public void writeToAllClients(String msg, Set<SocketChannel> clientSocketChannels) throws IOException {
-        for (SocketChannel clientSocketChannel : clientSocketChannels) {
-            writeToClient(msg, clientSocketChannel);
-        }
     }
 }

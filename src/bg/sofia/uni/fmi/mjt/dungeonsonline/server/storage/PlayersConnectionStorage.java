@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,12 +50,16 @@ public class PlayersConnectionStorage {
         playersSocketChannelToHero.remove(socketChannel);
     }
 
-    public Hero getPlayerHero(SocketChannel socketChannel) {
+    public Hero playerHero(SocketChannel socketChannel) {
         return playersSocketChannelToHero.get(socketChannel);
     }
 
-    public boolean isPlayerAlreadyConnected(SocketChannel socketChannel) {
+    public boolean isPlayerConnected(SocketChannel socketChannel) {
         return playersSocketChannelToHero.containsKey(socketChannel);
+    }
+
+    public boolean removePlayersWithInterruptedConnection() {
+        return playersSocketChannelToHero.keySet().removeIf(sc -> !sc.isOpen());
     }
 
     public Hero getPlayerHeroByHeroSymbol(char heroSymbol) {
