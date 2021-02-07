@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class StaticObjectsStorage {
+public class StaticObjectsStorage {
 
     private static StaticObjectsStorage instance;
 
@@ -111,7 +111,9 @@ public final class StaticObjectsStorage {
         return treasures;
     }
 
-    public Treasure getTreasure() { return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES)); }
+    public Treasure getTreasure() {
+        System.out.println(TOTAL_NUMBER_OF_TREASURES);
+        return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES)); }
 
     public Minion getMinion() {
         return minions.get((beatenMinions++ % TOTAL_NUMBER_OF_TREASURES));

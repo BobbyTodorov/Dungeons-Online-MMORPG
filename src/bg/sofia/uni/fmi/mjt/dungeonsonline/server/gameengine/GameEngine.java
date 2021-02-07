@@ -64,7 +64,7 @@ public class GameEngine {
     public String moveHero(Hero hero, Direction direction) {
         ArgumentValidator.checkForNullArguments(hero, direction);
 
-        Position currentHeroPosition = hero.getPositionOnMap();
+        Position currentHeroPosition = hero.positionOnMap();
         Position newHeroPosition = Position.createPosition(currentHeroPosition, direction);
 
         char newPositionFieldSymbol;
@@ -180,7 +180,7 @@ public class GameEngine {
             hero1.gainExperience(EXPERIENCE_PER_KILLING_HERO);
 
             if (hero2.backpack().size() == 0) {
-                map.changeGivenFieldByCoordinatesSymbol(hero2.getPositionOnMap().getCoordinate(), Map.FREE_FIELD_SYMBOL);
+                map.changeGivenFieldByCoordinatesSymbol(hero2.positionOnMap().getCoordinate(), Map.FREE_FIELD_SYMBOL);
             } else {
                 dropTreasureFromHero(hero2, hero2.backpack().remove(0));
             }
@@ -195,6 +195,6 @@ public class GameEngine {
 
     private void dropTreasureFromHero(Hero hero, Treasure treasure) {
         staticObjectsStorage.addTreasure(treasure);
-        map.changeGivenFieldByCoordinatesSymbol(hero.getPositionOnMap().getCoordinate(), Treasure.SYMBOL_TO_VISUALIZE_ON_MAP);
+        map.changeGivenFieldByCoordinatesSymbol(hero.positionOnMap().getCoordinate(), Treasure.SYMBOL_TO_VISUALIZE_ON_MAP);
     }
 }

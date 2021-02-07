@@ -14,8 +14,9 @@ public interface IHero extends Actor {
 
     /**
      * Hero gains given amount of experience.
+     * @return
      */
-    void gainExperience(int amountOfExperience);
+    int gainExperience(int amountOfExperience);
 
     /**
      * Hero collects given treasure to its backpack.

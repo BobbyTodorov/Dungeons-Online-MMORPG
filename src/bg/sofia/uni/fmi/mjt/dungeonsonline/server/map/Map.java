@@ -102,7 +102,8 @@ public final class Map {
     }
 
     private boolean isValidSymbol(char symbol) {
-        return symbol == FREE_FIELD_SYMBOL
+        return symbol == UNINITIALIZED_FIELD_SYMBOL
+            || symbol == FREE_FIELD_SYMBOL
             || symbol == OBSTACLE_FIELD_SYMBOL
             || symbol == Treasure.SYMBOL_TO_VISUALIZE_ON_MAP
             || symbol == IMinion.SYMBOL_TO_VISUALIZE_ON_MAP

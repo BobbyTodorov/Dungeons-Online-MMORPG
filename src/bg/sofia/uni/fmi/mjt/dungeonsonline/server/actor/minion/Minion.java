@@ -22,7 +22,7 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
     private final static int START_DEFENSE_POINTS = 10;
 
     public Minion(String name, int level, Weapon weapon, Spell spell, Stats stats) {
-        super(name);
+        super(name, stats);
 
         ArgumentValidator.checkForPositiveArguments(level);
         ArgumentValidator.checkForNullArguments(stats);
@@ -30,7 +30,6 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
         this.level = level;
         this.weapon = weapon;
         this.spell = spell;
-        this.stats = stats;
     }
 
     public static Minion createMinionByDifficultyLevel(MinionDifficultyLevel difficultyLevel) {
@@ -42,6 +41,22 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
             case HARD -> { return createHardMinion(); }
             default -> { return null; }
         }
+    }
+
+    @Override
+    public int giveExperience() {
+        return level * EXPERIENCE_TO_GIVE_PER_LEVEL;
+    }
+
+    @Override
+    public String toString() {
+        return "Minion{" +
+            "name='" + name + '\'' +
+            ", level=" + level +
+            ", stats=" + stats +
+            ", weapon=" + weapon +
+            ", spell=" + spell +
+            '}';
     }
 
     private static Minion createEasyMinion() {
@@ -63,11 +78,6 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
         return new Minion("hard minion", 5, hardWeapon, hardSpell, calcStatsByLevel(minionLevel));
     }
 
-    @Override
-    public int giveExperience() {
-        return level * EXPERIENCE_TO_GIVE_PER_LEVEL;
-    }
-
     private static Stats calcStatsByLevel(int level) {
         return new Stats(
             START_HEALTH_POINTS + HEALTH_PER_LEVEL_MULTIPLIER * level,
@@ -75,16 +85,5 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
             START_ATTACK_POINTS + ATTACK_PER_LEVEL_MULTIPLIER * level,
             START_DEFENSE_POINTS + DEFENSE_PER_LEVEL_MULTIPLIER * level
         );
-    }
-
-    @Override
-    public String toString() {
-        return "Minion{" +
-            "name='" + name + '\'' +
-            ", level=" + level +
-            ", stats=" + stats +
-            ", weapon=" + weapon +
-            ", spell=" + spell +
-            '}';
     }
 }

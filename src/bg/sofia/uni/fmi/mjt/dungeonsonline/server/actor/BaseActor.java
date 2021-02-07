@@ -13,10 +13,11 @@ public abstract class BaseActor implements Actor {
     protected Weapon weapon;
     protected Spell spell;
 
-    protected BaseActor(String name) {
-        ArgumentValidator.checkForNullArguments(name);
+    public BaseActor(String name, Stats stats) {
+        ArgumentValidator.checkForNullArguments(name, stats);
 
         this.name = name;
+        this.stats = stats;
     }
 
     @Override

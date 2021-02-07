@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server;
 
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Backpack;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Direction;
@@ -18,6 +19,8 @@ import java.nio.channels.SocketChannel;
 public class DungeonsOnlineServer {
 
     private static final int MAX_NUMBER_OF_PLAYERS_CONNECTED = 9;
+
+    private static final Stats START_HERO_STATS = new Stats(100, 100, 50, 50);
 
     private static final String ENTER_YOUR_NAME_MESSAGE = "Enter your name: ";
     private static final String GAME_ON_MESSAGE = "Game On!";
@@ -109,7 +112,7 @@ public class DungeonsOnlineServer {
             heroName = networkServer.readFromClient(client);
         } while (heroName == null);
 
-        Hero newHero = new Hero(heroName);
+        Hero newHero = new Hero(heroName, START_HERO_STATS);
         playersConnectionStorage.connectPlayer(client, newHero);
         gameEngine.summonPlayerHero(newHero);
 
@@ -187,7 +190,8 @@ public class DungeonsOnlineServer {
             return interactWithTreasure(client);
         }
 
-        if (moveHeroResult.contains(GameEngine.STEP_ON_PLAYER_STATUS)) { //"player" followed by his hero symbol. For example "player 4".
+        if (moveHeroResult.contains(GameEngine.STEP_ON_PLAYER_STATUS)) {
+            //"player" followed by his hero symbol. For example "player 4".
             Hero otherHero = playersConnectionStorage.getPlayerHeroByHeroSymbol((moveHeroResult.split(" ")[1].charAt(0)));
             return interactWithPlayerHero(client, otherHero);
         }

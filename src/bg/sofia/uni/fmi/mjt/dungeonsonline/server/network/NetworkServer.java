@@ -1,5 +1,10 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.network;
 
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerClosureFailException;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerCreationFailedException;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerRunningInterruptedException;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -9,13 +14,15 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class NetworkServer {
+
+    private static final String SERVER_RUNNING_INTERRUPTED_EXCEPTION_MESSAGE = "Server running was interrupted.";
+    private static final String SERVER_CREATION_FAILED_EXCEPTION_MESSAGE = "Server creation failed.";
+    private static final String SERVER_CLOSURE_FAIL_EXCEPTION_MESSAGE = "Server closing failed.";
 
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_HOST = "localhost";
@@ -43,6 +50,8 @@ public class NetworkServer {
     }
 
     public void addReceivedClientRequest(SocketChannel clientChannel, String request) {
+        ArgumentValidator.checkForNullArguments(clientChannel, request);
+
         receivedClientRequests.add(new ClientRequest(clientChannel, request));
     }
 
@@ -61,13 +70,11 @@ public class NetworkServer {
                 try {
                     run();
                 } catch (IOException e) {
-                    throw new RuntimeException("Server running was interrupted", e);
-                    //throw new RunningInterruptedException("Server running was interrupted", e);
+                    throw new ServerRunningInterruptedException(SERVER_RUNNING_INTERRUPTED_EXCEPTION_MESSAGE, e);
                 }
             }).start();
         } catch (IOException e) {
-            System.out.println("server creation failed");
-            //throw new CreationFailedException("Server creation failed", e);
+            throw new ServerCreationFailedException(SERVER_CREATION_FAILED_EXCEPTION_MESSAGE, e);
         }
     }
 
@@ -80,8 +87,7 @@ public class NetworkServer {
             try {
                 serverSocketChannel.close();
             } catch (IOException e) {
-                System.out.println("closing server failed");
-                //throw new ClosureFailed("Closing server failed", e);
+                throw new ServerClosureFailException(SERVER_CLOSURE_FAIL_EXCEPTION_MESSAGE, e);
             }
         }
     }
@@ -142,7 +148,6 @@ public class NetworkServer {
         if (clientChannel.read(buffer) <= 0) {
             return null;
         }
-        //had -1 check
 
         buffer.flip();
         byte[] clientInputBytes = new byte[buffer.remaining()];

@@ -6,7 +6,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Backpack {
+public class Backpack {
 
     private final List<Treasure> treasures = new ArrayList<>();
 

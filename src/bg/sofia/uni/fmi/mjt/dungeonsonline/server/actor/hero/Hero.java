@@ -9,12 +9,8 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Weapon;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
-public final class Hero extends BaseActor implements IHero {
+public class Hero extends BaseActor implements IHero {
 
-    private final static int START_HEALTH_POINTS = 1;
-    private final static int START_MANA_POINTS = 100;
-    private final static int START_ATTACK_POINTS = 1;
-    private final static int START_DEFENSE_POINTS = 50;
     private final static int START_LEVEL = 1;
     private final static Weapon START_WEAPON = null;
     private final static Spell START_SPELL = null;
@@ -33,9 +29,8 @@ public final class Hero extends BaseActor implements IHero {
     private static int numberOfInstances = 0;
     private final int symbolToVisualize;
 
-    public Hero(String name) {
-        super(name);
-        this.stats = getStartStats();
+    public Hero(String name, Stats stats) {
+        super(name, stats);
         this.level = START_LEVEL;
         this.weapon = START_WEAPON;
         this.spell = START_SPELL;
@@ -50,6 +45,14 @@ public final class Hero extends BaseActor implements IHero {
         return backpack;
     }
 
+    public Position positionOnMap() {
+        return this.positionOnMap;
+    }
+
+    public void setPositionOnMap(Coordinate coordinate) {
+        this.positionOnMap.setCoordinate(coordinate);
+    }
+
     @Override
     public void collectTreasure(Treasure treasure) {
         ArgumentValidator.checkForNullArguments(treasure);
@@ -58,12 +61,14 @@ public final class Hero extends BaseActor implements IHero {
     }
 
     @Override
-    public void gainExperience(int amountOfExperience) {
+    public int gainExperience(int amountOfExperience) {
         ArgumentValidator.checkForPositiveArguments(amountOfExperience);
 
         this.experience += amountOfExperience;
 
         tryLevelingUp();
+
+        return this.experience;
     }
 
     @Override
@@ -122,14 +127,6 @@ public final class Hero extends BaseActor implements IHero {
         return false;
     }
 
-    public void setPositionOnMap(Coordinate coordinate) {
-        this.positionOnMap.setCoordinate(coordinate);
-    }
-
-    public Position getPositionOnMap() {
-        return this.positionOnMap;
-    }
-
     private void tryLevelingUp() {
         int totalExperienceForLevelUp = EXPERIENCE_NEEDED_PER_LEVEL_MULTIPLIER * level;
         if (experience >= totalExperienceForLevelUp) {
@@ -145,15 +142,6 @@ public final class Hero extends BaseActor implements IHero {
         stats.increaseCurrentMana(MANA_INCREASE_PER_LEVEL);
         stats.increaseAttack(ATTACK_INCREASE_PER_LEVEL);
         stats.increaseDefense(DEFENSE_INCREASE_PER_LEVEL);
-    }
-
-    private Stats getStartStats() {
-        return new Stats(
-            START_HEALTH_POINTS,
-            START_MANA_POINTS,
-            START_ATTACK_POINTS,
-            START_DEFENSE_POINTS
-        );
     }
 
     @Override

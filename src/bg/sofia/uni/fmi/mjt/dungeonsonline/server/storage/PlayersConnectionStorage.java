@@ -41,6 +41,8 @@ public class PlayersConnectionStorage {
     }
 
     public void connectPlayer(SocketChannel socketChannel, Hero hero) throws MaxNumberOfPlayersReachedException {
+        ArgumentValidator.checkForNullArguments(socketChannel, hero);
+
         if (numberOfPlayers > MAX_NUMBER_OF_PLAYERS) {
             throw new MaxNumberOfPlayersReachedException(MAX_NUMBER_OF_PLAYERS_REACHED_EXCEPTION);
         }
@@ -52,8 +54,10 @@ public class PlayersConnectionStorage {
     public void disconnectPlayer(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
 
-        numberOfPlayers--;
-        playersSocketChannelToHero.remove(socketChannel);
+        if (playersSocketChannelToHero.containsKey(socketChannel)) {
+            numberOfPlayers--;
+            playersSocketChannelToHero.remove(socketChannel);
+        }
     }
 
     public Hero playerHero(SocketChannel socketChannel) {
