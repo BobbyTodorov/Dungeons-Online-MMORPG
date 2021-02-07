@@ -7,8 +7,10 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Position;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.minion.Minion;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Map;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.exceptions.OutOfMapBoundsException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public class GameEngine {
 
@@ -43,28 +45,32 @@ public class GameEngine {
     }
 
     public String getMapToVisualize() {
-        assert map != null;
         return map.getMap();
     }
 
     public void summonPlayerHero(Hero hero) {
-        assert map != null;
+        ArgumentValidator.checkForNullArguments(hero);
+
         Coordinate summonedHeroPosition = map.changeRandomFieldWithGivenSymbolToAnother(Map.FREE_FIELD_SYMBOL, getHeroSymbol(hero));
         hero.setPositionOnMap(summonedHeroPosition);
     }
 
     public void unSummonPlayerHero(Hero hero) {
+        ArgumentValidator.checkForNullArguments(hero);
+
         map.changeRandomFieldWithGivenSymbolToAnother(getHeroSymbol(hero), Map.FREE_FIELD_SYMBOL);
     }
 
     public String moveHero(Hero hero, Direction direction) {
+        ArgumentValidator.checkForNullArguments(hero, direction);
+
         Position currentHeroPosition = hero.getPositionOnMap();
         Position newHeroPosition = Position.createPosition(currentHeroPosition, direction);
 
         char newPositionFieldSymbol;
         try {
             newPositionFieldSymbol = map.getFieldSymbol(newHeroPosition.getCoordinate());
-        } catch (ArrayIndexOutOfBoundsException e) { //TODO proper map exception
+        } catch (OutOfMapBoundsException e) {
             return STEP_ON_BOUND_MESSAGE;
         }
 
@@ -86,6 +92,8 @@ public class GameEngine {
     }
 
     public String executeCommandOnHeroTreasure(PlayerCommand command, Hero hero, Treasure treasure) {
+        ArgumentValidator.checkForNullArguments(command, hero, treasure);
+
         switch (command) {
             case DROP -> { dropTreasureFromHero(hero, treasure); }
             case USE -> { return treasure.collect(hero); }
@@ -95,6 +103,7 @@ public class GameEngine {
     }
 
     public String battleWithPlayer(Hero initiator, Hero enemy) {
+        ArgumentValidator.checkForNullArguments(initiator, enemy);
 
         StringBuilder battleResult = new StringBuilder(String.format(INITIATE_BATTLE_STRING, initiator, enemy));
 
@@ -117,11 +126,25 @@ public class GameEngine {
     }
 
     public String tradeWithPlayer(Hero initiator, Hero otherHero, int treasureIndex) {
+        ArgumentValidator.checkForNullArguments(initiator, otherHero);
+        ArgumentValidator.checkForNonNegativeArguments(treasureIndex);
+
         Treasure treasureToTrade = initiator.backpack().remove(treasureIndex);
         otherHero.backpack().addTreasure(treasureToTrade);
+
         return String.format(TRADE_MESSAGE, treasureToTrade.toString(), otherHero.getName());
     }
 
+    private String moveHeroToPosition(Hero hero, Position oldPosition, Position newPosition) {
+        if (map.getFieldSymbol(oldPosition.getCoordinate()) != Treasure.SYMBOL_TO_VISUALIZE_ON_MAP) { // in case of drop
+            map.changeGivenFieldByCoordinatesSymbol(oldPosition.getCoordinate(), Map.FREE_FIELD_SYMBOL);
+        }
+        map.changeGivenFieldByCoordinatesSymbol(newPosition.getCoordinate(), getHeroSymbol(hero));
+
+        hero.setPositionOnMap(newPosition.getCoordinate());
+
+        return HERO_MOVED_MESSAGE;
+    }
 
     private String moveHeroToMinionField(Hero initiator, Position currentPosition, Position newPosition) {
         Minion enemyMinion = staticObjectsStorage.getMinion();
@@ -168,21 +191,7 @@ public class GameEngine {
         return null;
     }
 
-    private String moveHeroToPosition(Hero hero, Position oldPosition, Position newPosition) {
-
-        if (map.getFieldSymbol(oldPosition.getCoordinate()) != Treasure.SYMBOL_TO_VISUALIZE_ON_MAP) { // in case of drop
-            map.changeGivenFieldByCoordinatesSymbol(oldPosition.getCoordinate(), Map.FREE_FIELD_SYMBOL);
-        }
-        map.changeGivenFieldByCoordinatesSymbol(newPosition.getCoordinate(), getHeroSymbol(hero));
-
-        hero.setPositionOnMap(newPosition.getCoordinate());
-
-        return HERO_MOVED_MESSAGE;
-    }
-
-    private char getHeroSymbol(Hero hero) {
-        return hero.getSymbolToVisualizeOnMap();
-    }
+    private char getHeroSymbol(Hero hero) { return hero.getSymbolToVisualizeOnMap(); }
 
     private void dropTreasureFromHero(Hero hero, Treasure treasure) {
         staticObjectsStorage.addTreasure(treasure);

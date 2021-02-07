@@ -31,7 +31,7 @@ public final class Hero extends BaseActor implements IHero {
     private int experience;
 
     private static int numberOfInstances = 0;
-    private int symbolToVisualize;
+    private final int symbolToVisualize;
 
     public Hero(String name) {
         super(name);
@@ -68,6 +68,12 @@ public final class Hero extends BaseActor implements IHero {
 
     @Override
     public void takeHealing(int healingPoints) {
+        ArgumentValidator.checkForNonNegativeArguments(healingPoints);
+
+        if (healingPoints == 0) {
+            return;
+        }
+
         if (stats.getCurrentHealth() <= 0)  {
             return;
         }
@@ -77,6 +83,12 @@ public final class Hero extends BaseActor implements IHero {
 
     @Override
     public void takeMana(int manaPoints) {
+        ArgumentValidator.checkForNonNegativeArguments(manaPoints);
+
+        if (manaPoints == 0) {
+            return;
+        }
+
         stats.increaseCurrentMana(manaPoints);
     }
 

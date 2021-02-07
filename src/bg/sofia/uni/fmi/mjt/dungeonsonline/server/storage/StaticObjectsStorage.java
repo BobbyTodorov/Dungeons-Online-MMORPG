@@ -8,8 +8,8 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion.ManaPotion;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion.PotionSize;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Weapon;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
-import javax.xml.validation.Validator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,6 +98,8 @@ public final class StaticObjectsStorage {
     }
 
     public void addTreasure(Treasure treasure) {
+        ArgumentValidator.checkForNullArguments(treasure);
+
         treasures.add(0, treasure);
     }
 

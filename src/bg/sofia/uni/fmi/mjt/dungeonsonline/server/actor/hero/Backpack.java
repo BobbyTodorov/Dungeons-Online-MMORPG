@@ -27,6 +27,8 @@ public final class Backpack {
     }
 
     public void remove(Treasure treasure) {
+        ArgumentValidator.checkForNullArguments(treasure);
+
         treasures.remove(treasure);
     }
 

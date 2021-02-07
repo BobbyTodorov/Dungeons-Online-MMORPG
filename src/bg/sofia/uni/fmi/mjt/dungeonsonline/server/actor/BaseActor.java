@@ -7,8 +7,6 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public abstract class BaseActor implements Actor {
 
-    private final static int HAND_DAMAGE = 10;
-
     protected String name;
     protected int level;
     protected Stats stats;

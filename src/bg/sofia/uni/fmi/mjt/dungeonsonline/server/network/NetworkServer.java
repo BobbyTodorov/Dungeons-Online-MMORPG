@@ -9,7 +9,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -26,7 +28,6 @@ public class NetworkServer {
     private boolean isRunning;
 
     private final Queue<ClientRequest> receivedClientRequests = new LinkedBlockingQueue<>();
-    private final Queue<ClientRequest> toSendClientRequests = new LinkedBlockingQueue<>();
 
 
     private NetworkServer() {}
@@ -43,10 +44,6 @@ public class NetworkServer {
 
     public void addReceivedClientRequest(SocketChannel clientChannel, String request) {
         receivedClientRequests.add(new ClientRequest(clientChannel, request));
-    }
-
-    public void addToSendClientRequest(SocketChannel clientChannel, String request) {
-        toSendClientRequests.add(new ClientRequest(clientChannel, request));
     }
 
     public ClientRequest pollClientRequest() {
@@ -95,28 +92,14 @@ public class NetworkServer {
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
-    private void run() {
-        Thread clientRequestsReceiver = new Thread(this::receiveClientRequests);
-        Thread clientRequestsSender = new Thread()
-
-    }
-
-    private void sendClientRequests() {
-        
-    }
-
-    private void receiveClientRequests() {
-        try {
-            while (isRunning) {
-                if (selector.select() == 0) {
-                    continue;
-                }
-                Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
-
-                receiveSocketChannelsClientRequests(keyIterator);
+    private void run() throws IOException {
+        while (isRunning) {
+            if (selector.select() == 0) {
+                continue;
             }
-        } catch (IOException e) {
-            throw new RuntimeException("server receiving interrupted", e); //TODO proper exceptions
+            Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+
+            receiveSocketChannelsClientRequests(keyIterator);
         }
     }
 
@@ -156,7 +139,7 @@ public class NetworkServer {
 
     public String readFromClient(SocketChannel clientChannel) throws IOException {
         buffer.clear();
-        if (clientChannel.read(buffer) < 0) {
+        if (clientChannel.read(buffer) <= 0) {
             return null;
         }
         //had -1 check

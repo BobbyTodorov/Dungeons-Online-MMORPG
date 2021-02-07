@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.ClientRequest;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.NetworkServer;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.PlayersConnectionStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.BaseSkill;
 
@@ -32,6 +33,9 @@ public class DungeonsOnlineServer {
     private static final String BACKPACK_FUNCTION_MESSAGE = "Please choose: u (use) / d (drop)";
 
     private static final String DEAD_PLAYER_MESSAGE = "You died!";
+
+    private static final String MAX_NUMBER_OF_PLAYERS_REACHED = "Max number of players reached. Please try later.";
+
 
     private static final NetworkServer networkServer = NetworkServer.getInstance();
     private static final PlayersConnectionStorage playersConnectionStorage = PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
@@ -74,10 +78,13 @@ public class DungeonsOnlineServer {
             if (playersConnectionStorage.isPlayerConnected(client)) {
                 endPlayerSession(client);
             }
+        } catch (MaxNumberOfPlayersReachedException e) {
+            networkServer.writeToClient(MAX_NUMBER_OF_PLAYERS_REACHED, client);
         }
     }
 
-    private String executeCommandForPlayer(PlayerCommand command, SocketChannel client) throws IOException {
+    private String executeCommandForPlayer(PlayerCommand command, SocketChannel client)
+        throws IOException, MaxNumberOfPlayersReachedException {
         switch (command) {
             case START -> { return startPlayerSession(client); }
             case DISCONNECT -> { endPlayerSession(client); }
@@ -94,7 +101,7 @@ public class DungeonsOnlineServer {
         return null; //in case of endPlayerSession
     }
 
-    private String startPlayerSession(SocketChannel client) throws IOException {
+    private String startPlayerSession(SocketChannel client) throws IOException, MaxNumberOfPlayersReachedException {
         networkServer.writeToClient(ENTER_YOUR_NAME_MESSAGE, client);
 
         String heroName;

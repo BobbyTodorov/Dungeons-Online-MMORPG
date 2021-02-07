@@ -1,14 +1,17 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class PlayersConnectionStorage {
+
+    private final static String MAX_NUMBER_OF_PLAYERS_REACHED_EXCEPTION = "Maximum number of players reached.";
 
     private final int MAX_NUMBER_OF_PLAYERS;
 
@@ -20,6 +23,8 @@ public class PlayersConnectionStorage {
 
 
     private PlayersConnectionStorage(int maxNumberOfPlayers) {
+        ArgumentValidator.checkForPositiveArguments(maxNumberOfPlayers);
+
         this.MAX_NUMBER_OF_PLAYERS = maxNumberOfPlayers;
     }
 
@@ -35,10 +40,9 @@ public class PlayersConnectionStorage {
         return playersSocketChannelToHero.keySet();
     }
 
-    public void connectPlayer(SocketChannel socketChannel, Hero hero) {
+    public void connectPlayer(SocketChannel socketChannel, Hero hero) throws MaxNumberOfPlayersReachedException {
         if (numberOfPlayers > MAX_NUMBER_OF_PLAYERS) {
-            //TODO throw
-            return;
+            throw new MaxNumberOfPlayersReachedException(MAX_NUMBER_OF_PLAYERS_REACHED_EXCEPTION);
         }
 
         numberOfPlayers++;
@@ -46,20 +50,26 @@ public class PlayersConnectionStorage {
     }
 
     public void disconnectPlayer(SocketChannel socketChannel) {
+        ArgumentValidator.checkForNullArguments(socketChannel);
+
         numberOfPlayers--;
         playersSocketChannelToHero.remove(socketChannel);
     }
 
     public Hero playerHero(SocketChannel socketChannel) {
+        ArgumentValidator.checkForNullArguments(socketChannel);
+
         return playersSocketChannelToHero.get(socketChannel);
     }
 
     public boolean isPlayerConnected(SocketChannel socketChannel) {
+        ArgumentValidator.checkForNullArguments(socketChannel);
+
         return playersSocketChannelToHero.containsKey(socketChannel);
     }
 
-    public boolean removePlayersWithInterruptedConnection() {
-        return playersSocketChannelToHero.keySet().removeIf(sc -> !sc.isOpen());
+    public void removePlayersWithInterruptedConnection() {
+        playersSocketChannelToHero.keySet().removeIf(sc -> !sc.isOpen());
     }
 
     public Hero getPlayerHeroByHeroSymbol(char heroSymbol) {

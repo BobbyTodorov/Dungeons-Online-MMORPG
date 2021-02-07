@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public class Position {
     Coordinate coordinate;
@@ -23,6 +24,8 @@ public class Position {
      * @return newPosition or Position(0,0) if direction is null
      */
     public static Position createPosition(Position oldPosition, Direction direction){
+        ArgumentValidator.checkForNullArguments(oldPosition, direction);
+
         Position newPosition;
 
         switch (direction) {
