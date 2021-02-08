@@ -18,14 +18,16 @@ public class PlayersConnectionStorage {
     private static PlayersConnectionStorage instance;
 
     private static final Map<SocketChannel, Hero> playersSocketChannelToHero = new LinkedHashMap<>();
-
-    private int numberOfPlayers = 0;
+    private static final Map<Integer, Boolean>  playersSymbolsToAvailable = new LinkedHashMap<>();
 
 
     private PlayersConnectionStorage(int maxNumberOfPlayers) {
         ArgumentValidator.checkForPositiveArguments(maxNumberOfPlayers);
 
         this.MAX_NUMBER_OF_PLAYERS = maxNumberOfPlayers;
+        for (int i = 1; i <= MAX_NUMBER_OF_PLAYERS; ++i) {
+            playersSymbolsToAvailable.put(i, true);
+        }
     }
 
     public static PlayersConnectionStorage getInstance(int maxNumberOfPlayers) {
@@ -43,22 +45,20 @@ public class PlayersConnectionStorage {
     public void connectPlayer(SocketChannel socketChannel, Hero hero) throws MaxNumberOfPlayersReachedException {
         ArgumentValidator.checkForNullArguments(socketChannel, hero);
 
-        if (numberOfPlayers > MAX_NUMBER_OF_PLAYERS) {
+        if (playersSocketChannelToHero.size() >= MAX_NUMBER_OF_PLAYERS) {
             throw new MaxNumberOfPlayersReachedException(MAX_NUMBER_OF_PLAYERS_REACHED_EXCEPTION);
         }
 
-        numberOfPlayers++;
-        hero.setSymbolToVisualize(numberOfPlayers);
+        int firstAvailableHeroSymbol = getFirstAvailableHeroSymbol();
+        playersSymbolsToAvailable.put(firstAvailableHeroSymbol, false);
+        hero.setSymbolToVisualize(firstAvailableHeroSymbol);
         playersSocketChannelToHero.put(socketChannel, hero);
     }
 
     public void disconnectPlayer(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
-
-        if (playersSocketChannelToHero.containsKey(socketChannel)) {
-            numberOfPlayers--;
-            playersSocketChannelToHero.remove(socketChannel);
-        }
+        playersSymbolsToAvailable.put(playersSocketChannelToHero.get(socketChannel).getSymbolToVisualizeOnMap() - '0', true);
+        playersSocketChannelToHero.remove(socketChannel);
     }
 
     public Hero playerHero(SocketChannel socketChannel) {
@@ -74,8 +74,14 @@ public class PlayersConnectionStorage {
     }
 
     public void removePlayersWithInterruptedConnection() {
-        //TODO numberOfPlayers--
+        for (Map.Entry<SocketChannel, Hero> playerEntry : playersSocketChannelToHero.entrySet()) {
+            if (!playerEntry.getKey().isOpen()) {
+                playersSymbolsToAvailable.put((int) (playerEntry.getValue().getSymbolToVisualizeOnMap() - '0'), true);
+            }
+        }
+
         playersSocketChannelToHero.keySet().removeIf(sc -> !sc.isOpen());
+
     }
 
     public Hero getPlayerHeroByHeroSymbol(char heroSymbol) {
@@ -87,5 +93,14 @@ public class PlayersConnectionStorage {
         }
 
         return null;
+    }
+
+    private int getFirstAvailableHeroSymbol() {
+        for (Map.Entry<Integer, Boolean> entry : playersSymbolsToAvailable.entrySet()) {
+            if (entry.getValue()) {
+                return entry.getKey();
+            }
+        }
+        return 0;
     }
 }

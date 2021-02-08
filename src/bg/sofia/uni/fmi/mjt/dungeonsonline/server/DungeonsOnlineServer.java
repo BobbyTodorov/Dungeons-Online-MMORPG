@@ -75,7 +75,7 @@ public class DungeonsOnlineServer {
                 networkServer.writeToClient(commandResult, client);
             }
 
-            playersConnectionStorage.removePlayersWithInterruptedConnection();
+            removeDisconnectedPlayersFromGame();
             displayNewGameFrameToPlayers();
         } catch (IOException e) {
             if (playersConnectionStorage.isPlayerConnected(client)) {
@@ -84,6 +84,16 @@ public class DungeonsOnlineServer {
         } catch (MaxNumberOfPlayersReachedException e) {
             networkServer.writeToClient(MAX_NUMBER_OF_PLAYERS_REACHED, client);
         }
+    }
+
+    private void removeDisconnectedPlayersFromGame() {
+        for (SocketChannel players : playersConnectionStorage.getPlayersSocketChannels()) {
+            if (!players.isOpen()) {
+                gameEngine.unSummonPlayerHero(playersConnectionStorage.playerHero(players));
+            }
+        }
+
+        playersConnectionStorage.removePlayersWithInterruptedConnection();
     }
 
     private String executeCommandForPlayer(PlayerCommand command, SocketChannel client)
@@ -258,6 +268,7 @@ public class DungeonsOnlineServer {
     private void displayNewGameFrameToPlayers() throws IOException {
         for (SocketChannel player : playersConnectionStorage.getPlayersSocketChannels()) {
             if (playersConnectionStorage.playerHero(player).isAlive()) {
+
                 networkServer.writeToClient(gameEngine.getMapToVisualize(), player);
                 networkServer.writeToClient(playersConnectionStorage.playerHero(player).toString(), player); //TODO proper UI
             } else {

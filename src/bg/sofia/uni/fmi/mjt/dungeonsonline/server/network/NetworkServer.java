@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.network;
 
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.Logger;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerClosureFailException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerCreationFailedException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.exceptions.ServerRunningInterruptedException;
@@ -35,6 +36,7 @@ public class NetworkServer {
     private boolean isRunning;
 
     private final Queue<ClientRequest> receivedClientRequests = new LinkedBlockingQueue<>();
+    private final static Logger logger = Logger.getInstance();
 
 
     private NetworkServer() {}
@@ -102,7 +104,10 @@ public class NetworkServer {
         byte[] clientInputBytes = new byte[buffer.remaining()];
         buffer.get(clientInputBytes);
         String readString = new String(clientInputBytes, StandardCharsets.UTF_8);
-        System.out.println("Message [" + readString.trim() + "] received from client " + clientChannel.getRemoteAddress());
+
+        String logString = "Message [" + readString.trim() + "] received from client " + clientChannel.getRemoteAddress();
+        System.out.println(logString);
+        logger.log(logString);
 
         return readString.trim();
     }
@@ -111,8 +116,13 @@ public class NetworkServer {
         buffer.clear();
         buffer.put(msg.getBytes());
         buffer.flip();
-        System.out.println("Sending message to client: ");
-        System.out.println(msg);
+
+        String logString = "Sending message to client: ";
+        System.out.println(logString);
+        logger.log(logString);
+        logString = msg;
+        System.out.println(logString);
+        logger.log(logString);
         clientSocketChannel.write(buffer);
     }
 
@@ -143,7 +153,9 @@ public class NetworkServer {
                 try {
                     clientInput = readFromClient(clientChannel);
                 } catch (SocketException e) {
-                    System.out.println(clientChannel.getRemoteAddress() + " connection interrupted in NetworkServer");
+                    String logString = clientChannel.getRemoteAddress() + " connection interrupted in NetworkServer";
+                    System.out.println(logString);
+                    logger.log(logString);
                     clientChannel.close();
                     continue;
                 }
@@ -164,6 +176,8 @@ public class NetworkServer {
         clientSocketChannel.configureBlocking(false);
         clientSocketChannel.register(selector, SelectionKey.OP_READ);
 
-        System.out.println("Connection accepted from client " + clientSocketChannel.getRemoteAddress());
+        String logString = "Connection accepted from client " + clientSocketChannel.getRemoteAddress();
+        System.out.println(logString);
+        logger.log(logString);
     }
 }
