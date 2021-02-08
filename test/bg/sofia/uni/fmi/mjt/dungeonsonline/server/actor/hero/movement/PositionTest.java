@@ -2,26 +2,48 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
 import org.junit.Test;
-import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
 
 public class PositionTest {
 
-    @Mock
-    Coordinate coordinateMock;
-
     @Test
     public void testCreatePositionToTheLeft() {
-        //TODO
-        Position tempPosition = new Position(coordinateMock);
-        Coordinate currentCoordinate = tempPosition.getCoordinate();
+        Position oldPosition = new Position(new Coordinate(1 ,1));
 
-        Position testPosition = Position.createPosition(tempPosition, Direction.LEFT);
+        Position newPosition = Position.createPosition(oldPosition, Direction.LEFT);
 
-        //when(Coordinate::new).thenReturn(new Coordinate(tempPosition.coordinate.x() - 1, tempPosition.coordinate.y()));
+        assertEquals("createPosition should return correct position to the left",
+            new Coordinate(0, 1), newPosition.getCoordinate());
+    }
 
-        //assertEquals("createPosition should return correct position to the left", )
+    @Test
+    public void testCreatePositionToTheRight() {
+        Position oldPosition = new Position(new Coordinate(1 ,1));
+
+        Position newPosition = Position.createPosition(oldPosition, Direction.RIGHT);
+
+        assertEquals("createPosition should return correct position to the right",
+            new Coordinate(2, 1), newPosition.getCoordinate());
+    }
+
+    @Test
+    public void testCreatePositionToUp() {
+        Position oldPosition = new Position(new Coordinate(1 ,1));
+
+        Position newPosition = Position.createPosition(oldPosition, Direction.UP);
+
+        assertEquals("createPosition should return correct position to up",
+            new Coordinate(1, 0), newPosition.getCoordinate());
+    }
+
+    @Test
+    public void testCreatePositionToDown() {
+        Position oldPosition = new Position(new Coordinate(1 ,1));
+
+        Position newPosition = Position.createPosition(oldPosition, Direction.DOWN);
+
+        assertEquals("createPosition should return correct position to down",
+            new Coordinate(1, 2), newPosition.getCoordinate());
     }
 }

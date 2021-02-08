@@ -92,6 +92,30 @@ public class NetworkServer {
         }
     }
 
+    public String readFromClient(SocketChannel clientChannel) throws IOException {
+        buffer.clear();
+        if (clientChannel.read(buffer) <= 0) {
+            return null;
+        }
+
+        buffer.flip();
+        byte[] clientInputBytes = new byte[buffer.remaining()];
+        buffer.get(clientInputBytes);
+        String readString = new String(clientInputBytes, StandardCharsets.UTF_8);
+        System.out.println("Message [" + readString.trim() + "] received from client " + clientChannel.getRemoteAddress());
+
+        return readString.trim();
+    }
+
+    public void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
+        buffer.clear();
+        buffer.put(msg.getBytes());
+        buffer.flip();
+        System.out.println("Sending message to client: ");
+        System.out.println(msg);
+        clientSocketChannel.write(buffer);
+    }
+
     private void configureServerSocketChannel(ServerSocketChannel channel, Selector selector) throws IOException {
         channel.bind(new InetSocketAddress(SERVER_HOST, SERVER_PORT));
         channel.configureBlocking(false);
@@ -141,29 +165,5 @@ public class NetworkServer {
         clientSocketChannel.register(selector, SelectionKey.OP_READ);
 
         System.out.println("Connection accepted from client " + clientSocketChannel.getRemoteAddress());
-    }
-
-    public String readFromClient(SocketChannel clientChannel) throws IOException {
-        buffer.clear();
-        if (clientChannel.read(buffer) <= 0) {
-            return null;
-        }
-
-        buffer.flip();
-        byte[] clientInputBytes = new byte[buffer.remaining()];
-        buffer.get(clientInputBytes);
-        String readString = new String(clientInputBytes, StandardCharsets.UTF_8);
-        System.out.println("Message [" + readString.trim() + "] received from client " + clientChannel.getRemoteAddress());
-
-        return readString.trim();
-    }
-
-    public void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
-        buffer.clear();
-        buffer.put(msg.getBytes());
-        buffer.flip();
-        System.out.println("Sending message to client: ");
-        System.out.println(msg);
-        clientSocketChannel.write(buffer);
     }
 }

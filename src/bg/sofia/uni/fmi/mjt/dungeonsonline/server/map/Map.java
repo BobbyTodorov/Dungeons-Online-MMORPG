@@ -8,7 +8,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 import java.util.List;
 
-public final class Map {
+public class Map {
 
     private final static String INVALID_SYMBOL_EXCEPTION_MESSAGE = "Invalid symbol %s";
     private final static String OUT_OF_BOUNDS_EXCEPTION_MESSAGE = "Given coordinate is outside of map's bounds." +

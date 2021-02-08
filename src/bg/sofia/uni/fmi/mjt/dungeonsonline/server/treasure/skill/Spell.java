@@ -23,11 +23,12 @@ public final class Spell extends BaseSkill{
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {
-            return CANT_EQUIP_MESSAGE;
+            return String.format(CANT_EQUIP_MESSAGE, "Spell");
         }
 
         hero.learn(this);
-        return "Spell " + this.name + " Level: " + this.level + " Damage points: " + this.getDamage() + ", Mana cost: " + getManaCost();
+        return "Learned Spell " + this.name + " Level: " + this.level +
+            " Damage points: " + this.getDamage() + ", Mana cost: " + getManaCost();
     }
 
     @Override

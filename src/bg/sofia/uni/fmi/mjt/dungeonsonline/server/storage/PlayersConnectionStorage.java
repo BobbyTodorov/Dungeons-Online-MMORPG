@@ -48,6 +48,7 @@ public class PlayersConnectionStorage {
         }
 
         numberOfPlayers++;
+        hero.setSymbolToVisualize(numberOfPlayers);
         playersSocketChannelToHero.put(socketChannel, hero);
     }
 
@@ -73,15 +74,18 @@ public class PlayersConnectionStorage {
     }
 
     public void removePlayersWithInterruptedConnection() {
+        //TODO numberOfPlayers--
         playersSocketChannelToHero.keySet().removeIf(sc -> !sc.isOpen());
     }
 
     public Hero getPlayerHeroByHeroSymbol(char heroSymbol) {
-        return playersSocketChannelToHero.values().stream()
-            .filter(h -> h.getSymbolToVisualizeOnMap() == heroSymbol)
-            .reduce((a, b) -> {
-                throw new IllegalStateException("Multiple elements: " + a + ", " + b);
-            })
-            .orElse(null);
+        for (Map.Entry<SocketChannel, Hero> entry : playersSocketChannelToHero.entrySet()) {
+            Hero entryHero = entry.getValue();
+            if (entryHero.getSymbolToVisualizeOnMap() == heroSymbol) {
+                return entryHero;
+            }
+        }
+
+        return null;
     }
 }

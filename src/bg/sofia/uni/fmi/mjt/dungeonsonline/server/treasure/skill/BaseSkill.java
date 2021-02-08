@@ -9,7 +9,7 @@ public abstract class BaseSkill implements Skill {
     protected int damage;
     protected int level;
 
-    public final static String CANT_EQUIP_MESSAGE = "Weapon level is too high for you to equip.";
+    public final static String CANT_EQUIP_MESSAGE = "%s level is too high for you to equip.";
 
     public BaseSkill(String name, int damage, int level){
         ArgumentValidator.checkForNullArguments(name);

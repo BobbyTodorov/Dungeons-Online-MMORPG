@@ -26,8 +26,7 @@ public class Hero extends BaseActor implements IHero {
     private final Backpack backpack;
     private int experience;
 
-    private static int numberOfInstances = 0;
-    private final int symbolToVisualize;
+    private int symbolToVisualize;
 
     public Hero(String name, Stats stats) {
         super(name, stats);
@@ -36,8 +35,10 @@ public class Hero extends BaseActor implements IHero {
         this.spell = START_SPELL;
         positionOnMap = new Position(new Coordinate(0,0));
         this.backpack = new Backpack();
-        numberOfInstances++;
-        symbolToVisualize = numberOfInstances;
+    }
+
+    public void setSymbolToVisualize(int symbolToVisualize) {
+        this.symbolToVisualize = symbolToVisualize;
     }
 
     @Override

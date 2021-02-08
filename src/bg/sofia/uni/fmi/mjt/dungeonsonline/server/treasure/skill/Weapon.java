@@ -14,10 +14,11 @@ public final class Weapon extends BaseSkill{
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {
-            return CANT_EQUIP_MESSAGE;
+            return String.format(CANT_EQUIP_MESSAGE, "Weapon");
         }
 
         hero.equip(this);
-        return "Weapon " + this.name + " Level: " + this.level + " Damage points: " + this.getDamage() + " equipped!";
+        return "Equipped Weapon " + this.name + " Level: " + this.level +
+            " Damage points: " + this.getDamage();
     }
 }

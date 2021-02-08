@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static java.lang.invoke.MethodHandles.catchException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,6 +31,11 @@ public class PlayersConnectionStorageTest {
         testSocketChannel = SocketChannel.open();
     }
 
+    @After
+    public void disconnectTestSocketChannel() {
+        testPlayersConnectionStorage.disconnectPlayer(testSocketChannel);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void testConnectPlayerWithNullSocketChannelArgument() throws MaxNumberOfPlayersReachedException {
         testPlayersConnectionStorage.connectPlayer(null, testHero);
@@ -46,7 +51,7 @@ public class PlayersConnectionStorageTest {
         MaxNumberOfPlayersReachedException {
         List<SocketChannel> connectedSocketChannels = new ArrayList<>();
         try {
-            for (int i = 0; i <= MAX_NUMBER_OF_PLAYERS + 10; ++i) {
+            for (int i = 0; i <= MAX_NUMBER_OF_PLAYERS + 1; ++i) {
                 SocketChannel socketChannel = SocketChannel.open();
                 connectedSocketChannels.add(socketChannel);
 
@@ -129,9 +134,12 @@ public class PlayersConnectionStorageTest {
     }
 
     @Test
-    public void testGetPlayerHeroByHeroSymbol() throws MaxNumberOfPlayersReachedException {
-        testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
+    public void testGetPlayerHeroByHeroSymbol() throws MaxNumberOfPlayersReachedException, IOException {
+        Hero newHero = new Hero("", new Stats(1 , 1, 1, 1));
+        SocketChannel newSocketChannel = SocketChannel.open();
+        testPlayersConnectionStorage.connectPlayer(newSocketChannel, newHero);
+        newHero.setSymbolToVisualize(5);
 
-        assertEquals(testHero, testPlayersConnectionStorage.getPlayerHeroByHeroSymbol('1'));
+        assertEquals(newHero, testPlayersConnectionStorage.getPlayerHeroByHeroSymbol('5'));
     }
 }

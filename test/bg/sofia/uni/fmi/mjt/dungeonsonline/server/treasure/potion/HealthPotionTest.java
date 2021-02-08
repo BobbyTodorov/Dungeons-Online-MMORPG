@@ -1,17 +1,25 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion;
 
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HealthPotionTest {
 
-    private final static Hero testHero = new Hero("", new Stats(1, 1, 1, 1));
+    @Mock
+    Hero testHero;
 
+    @InjectMocks
+    HealthPotion testHealthPotion = HealthPotion.createHealthPotionBySize(PotionSize.REGULAR);
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreateHealthPotionBySizeWithNullArgument() {
@@ -33,9 +41,14 @@ public class HealthPotionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        HealthPotion healthPotion = HealthPotion.createHealthPotionBySize(PotionSize.REGULAR);
+        testHealthPotion.collect(null);
+    }
 
-        //TODO healthPotion.collect()
+    @Test
+    public void testCollectSuccess() {
+        testHealthPotion.collect(testHero);
+
+        verify(testHero).takeHealing(50);
     }
 
 }
