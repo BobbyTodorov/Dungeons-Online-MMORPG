@@ -10,18 +10,20 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Map;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.exceptions.OutOfMapBoundsException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.BaseSkill;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public class GameEngine {
 
-    public static final String STEP_ON_PLAYER_STATUS = "player %s";
-    public static final String STEP_ON_TREASURE_STATUS = "treasure";
+    public static final String STEP_ON_HERO_STATUS = "attempt to step on hero ";
+    public static final String STEP_ON_TREASURE_STATUS = "attempt to step on treasure";
 
     private static final String INITIATE_BATTLE_STRING = "BATTLE %s VS %s" + System.lineSeparator();
-    private static final String BATTLE_WIN_MESSAGE = System.lineSeparator() + "%s HAS WON!";
+    private static final String YOU_WON_MESSAGE = "You just won the battle!";
 
     private static final String TRADE_MESSAGE = "Traded %s with %s.";
     private static final String HERO_MOVED_MESSAGE = "Hero moved successfully.";
+    private static final String TREASURE_COLLECTED_TO_BACKPACK_MESSAGE = "%s collected to backpack.";
     private static final String STEP_ON_OBSTACLE_MESSAGE = "Obstacle there. Hero was not moved.";
     private static final String STEP_ON_BOUND_MESSAGE = "Hero reached bound and was not moved.";
     private static final String INVALID_DIRECTION_MESSAGE = "Invalid direction.";
@@ -58,7 +60,8 @@ public class GameEngine {
     public void unSummonPlayerHero(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
-        map.changeRandomFieldWithGivenSymbolToAnother(getHeroSymbol(hero), Map.FREE_FIELD_SYMBOL);
+        //map.changeRandomFieldWithGivenSymbolToAnother(getHeroSymbol(hero), Map.FREE_FIELD_SYMBOL);
+        map.changeGivenFieldByCoordinatesSymbol(hero.positionOnMap().coordinate(), Map.FREE_FIELD_SYMBOL);
     }
 
     public String moveHero(Hero hero, Direction direction) {
@@ -69,7 +72,7 @@ public class GameEngine {
 
         char newPositionFieldSymbol;
         try {
-            newPositionFieldSymbol = map.getFieldSymbol(newHeroPosition.getCoordinate());
+            newPositionFieldSymbol = map.getFieldSymbol(newHeroPosition.coordinate());
         } catch (OutOfMapBoundsException e) {
             return STEP_ON_BOUND_MESSAGE;
         }
@@ -78,7 +81,7 @@ public class GameEngine {
             case Map.FREE_FIELD_SYMBOL -> { return moveHeroToPosition(hero, currentHeroPosition, newHeroPosition); }
             case Map.OBSTACLE_FIELD_SYMBOL -> { return STEP_ON_OBSTACLE_MESSAGE; }
             case '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
-                return String.format(STEP_ON_PLAYER_STATUS, newPositionFieldSymbol);
+                return STEP_ON_HERO_STATUS + newPositionFieldSymbol;
             }
             case Treasure.SYMBOL_TO_VISUALIZE_ON_MAP -> {
                 moveHeroToPosition(hero, currentHeroPosition, newHeroPosition);
@@ -96,13 +99,13 @@ public class GameEngine {
 
         switch (command) {
             case DROP -> { dropTreasureFromHero(hero, treasure); }
-            case USE -> { return treasure.collect(hero); }
+            case USE -> { return treasure.consume(hero); }
         }
 
         return null;
     }
 
-    public String battleWithPlayer(Hero initiator, Hero enemy) {
+    public String battleWithAnotherHero(Hero initiator, Hero enemy) {
         ArgumentValidator.checkForNullArguments(initiator, enemy);
 
         StringBuilder battleResult = new StringBuilder(String.format(INITIATE_BATTLE_STRING, initiator, enemy));
@@ -111,7 +114,7 @@ public class GameEngine {
             enemy.takeDamage(initiator.attack());
             String resultAfterHit = checkIfHeroHasKilledAnotherHero(initiator, enemy);
             if (resultAfterHit != null) {
-                battleResult.append(resultAfterHit).append(DEAD_PLAYER_MESSAGE);
+                battleResult.append(resultAfterHit);
                 break;
             }
 
@@ -125,7 +128,7 @@ public class GameEngine {
         return battleResult.toString();
     }
 
-    public String tradeWithPlayer(Hero initiator, Hero otherHero, int treasureIndex) {
+    public String tradeTreasureWithAnotherHero(Hero initiator, Hero otherHero, int treasureIndex) {
         ArgumentValidator.checkForNullArguments(initiator, otherHero);
         ArgumentValidator.checkForNonNegativeArguments(treasureIndex);
 
@@ -135,13 +138,29 @@ public class GameEngine {
         return String.format(TRADE_MESSAGE, treasureToTrade.toString(), otherHero.getName());
     }
 
-    private String moveHeroToPosition(Hero hero, Position oldPosition, Position newPosition) {
-        if (map.getFieldSymbol(oldPosition.getCoordinate()) != Treasure.SYMBOL_TO_VISUALIZE_ON_MAP) { // in case of drop
-            map.changeGivenFieldByCoordinatesSymbol(oldPosition.getCoordinate(), Map.FREE_FIELD_SYMBOL);
-        }
-        map.changeGivenFieldByCoordinatesSymbol(newPosition.getCoordinate(), getHeroSymbol(hero));
+    public String heroTryConsumingTreasure(Hero hero, Treasure treasure) {
+        String collectResult = treasure.consume(hero);
 
-        hero.setPositionOnMap(newPosition.getCoordinate());
+        if (collectResult.equals(BaseSkill.CANT_EQUIP_MESSAGE)) {
+            return collectResult + System.lineSeparator() + collectTreasureToHeroBackpack(treasure, hero);
+        }
+
+        return collectResult;
+    }
+
+    public String collectTreasureToHeroBackpack(Treasure treasure, Hero hero) {
+        hero.collectTreasure(treasure);
+
+        return String.format(TREASURE_COLLECTED_TO_BACKPACK_MESSAGE, treasure.toString());
+    }
+
+    private String moveHeroToPosition(Hero hero, Position oldPosition, Position newPosition) {
+        if (map.getFieldSymbol(oldPosition.coordinate()) != Treasure.SYMBOL_TO_VISUALIZE_ON_MAP) { // in case of drop
+            map.changeGivenFieldByCoordinatesSymbol(oldPosition.coordinate(), Map.FREE_FIELD_SYMBOL);
+        }
+        map.changeGivenFieldByCoordinatesSymbol(newPosition.coordinate(), getHeroSymbol(hero));
+
+        hero.setPositionOnMap(newPosition.coordinate());
 
         return HERO_MOVED_MESSAGE;
     }
@@ -152,15 +171,14 @@ public class GameEngine {
 
         if (battleWithMinion(initiator, enemyMinion)) {
             moveHeroToPosition(initiator, currentPosition, newPosition);
-            return battleString + String.format(BATTLE_WIN_MESSAGE, initiator.getName());
+            return battleString + String.format(YOU_WON_MESSAGE, initiator.getName());
         } else {
-            return battleString + String.format(BATTLE_WIN_MESSAGE, enemyMinion.getName());
+            return battleString + String.format(YOU_WON_MESSAGE, enemyMinion.getName());
         }
     }
 
     private boolean battleWithMinion(Hero initiator, Minion enemy) {
         while (true) {
-
             enemy.takeDamage(initiator.attack());
             if(!enemy.isAlive()) {
                 initiator.gainExperience(enemy.giveExperience());
@@ -180,12 +198,12 @@ public class GameEngine {
             hero1.gainExperience(EXPERIENCE_PER_KILLING_HERO);
 
             if (hero2.backpack().size() == 0) {
-                map.changeGivenFieldByCoordinatesSymbol(hero2.positionOnMap().getCoordinate(), Map.FREE_FIELD_SYMBOL);
+                map.changeGivenFieldByCoordinatesSymbol(hero2.positionOnMap().coordinate(), Map.FREE_FIELD_SYMBOL);
             } else {
                 dropTreasureFromHero(hero2, hero2.backpack().remove(0));
             }
 
-            return String.format(BATTLE_WIN_MESSAGE, hero1.getName());
+            return String.format(YOU_WON_MESSAGE, hero1.getName());
         }
 
         return null;
@@ -195,6 +213,6 @@ public class GameEngine {
 
     private void dropTreasureFromHero(Hero hero, Treasure treasure) {
         staticObjectsStorage.addTreasure(treasure);
-        map.changeGivenFieldByCoordinatesSymbol(hero.positionOnMap().getCoordinate(), Treasure.SYMBOL_TO_VISUALIZE_ON_MAP);
+        map.changeGivenFieldByCoordinatesSymbol(hero.positionOnMap().coordinate(), Treasure.SYMBOL_TO_VISUALIZE_ON_MAP);
     }
 }

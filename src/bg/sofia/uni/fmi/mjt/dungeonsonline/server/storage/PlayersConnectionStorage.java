@@ -55,19 +55,19 @@ public class PlayersConnectionStorage {
         playersSocketChannelToHero.put(socketChannel, hero);
     }
 
-    public void disconnectPlayer(SocketChannel socketChannel) {
+    public void disconnectPlayerClient(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
         playersSymbolsToAvailable.put(playersSocketChannelToHero.get(socketChannel).getSymbolToVisualizeOnMap() - '0', true);
         playersSocketChannelToHero.remove(socketChannel);
     }
 
-    public Hero playerHero(SocketChannel socketChannel) {
+    public Hero getPlayerHeroOfGivenPlayerClient(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
 
         return playersSocketChannelToHero.get(socketChannel);
     }
 
-    public boolean isPlayerConnected(SocketChannel socketChannel) {
+    public boolean isPlayerClientConnected(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
 
         return playersSocketChannelToHero.containsKey(socketChannel);
@@ -76,7 +76,7 @@ public class PlayersConnectionStorage {
     public void removePlayersWithInterruptedConnection() {
         for (Map.Entry<SocketChannel, Hero> playerEntry : playersSocketChannelToHero.entrySet()) {
             if (!playerEntry.getKey().isOpen()) {
-                playersSymbolsToAvailable.put((int) (playerEntry.getValue().getSymbolToVisualizeOnMap() - '0'), true);
+                playersSymbolsToAvailable.put(playerEntry.getValue().getSymbolToVisualizeOnMap() - '0', true);
             }
         }
 

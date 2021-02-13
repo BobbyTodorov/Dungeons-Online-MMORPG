@@ -19,7 +19,7 @@ public final class Spell extends BaseSkill{
     }
 
     @Override
-    public String collect(Hero hero) {
+    public String consume(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {
@@ -35,7 +35,7 @@ public final class Spell extends BaseSkill{
     public String toString() {
         return "Spell{" +
             super.toString() +
-            " MANA_COST=" + MANA_COST +
+            ", MANA_COST=" + MANA_COST +
             '}';
     }
 }

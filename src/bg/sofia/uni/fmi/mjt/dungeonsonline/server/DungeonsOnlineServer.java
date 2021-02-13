@@ -11,7 +11,6 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.PlayersConnectionStora
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.BaseSkill;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
@@ -20,25 +19,27 @@ public class DungeonsOnlineServer {
 
     private static final int MAX_NUMBER_OF_PLAYERS_CONNECTED = 9;
 
-    private static final Stats START_HERO_STATS = new Stats(100, 100, 50, 50);
+    private static final int PLAYER_STARTING_HEALTH = 100;
+    private static final int PLAYER_STARTING_MANA = 100;
+    private static final int PLAYER_STARTING_ATTACK = 50;
+    private static final int PLAYER_STARTING_DEFENSE = 50;
 
     private static final String ENTER_YOUR_NAME_MESSAGE = "Enter your name: ";
     private static final String GAME_ON_MESSAGE = "Game On!";
     private static final String DISCONNECT_MESSAGE = System.lineSeparator() + "You are being disconnected.";
     private static final String WRONG_COMMAND_MESSAGE = "Wrong command.";
+    private static final String UNKNOWN_COMMAND = "Unknown command.";
 
     private static final String TREASURE_INTERACTION_MESSAGE = "%s found. c (consume) / b (to backpack).";
-    private static final String PLAYER_INTERACTION_MESSAGE = "interacting with %s, a (attack) / t (trade from backpack).";
-
-    private static final String TREASURE_COLLECTED_TO_BACKPACK_MESSAGE = "%s collected to backpack.";
+    private static final String PLAYER_INTERACTION_MESSAGE =
+        "interacting with %s, a (attack) / t (trade from backpack).";
 
     private static final String CHOOSE_INDEX_FROM_BACKPACK_MESSAGE = "Please choose treasure by index or 'cancel'.";
-    private static final String BACKPACK_FUNCTION_MESSAGE = "Please choose: u (use) / d (drop)";
+    private static final String BACKPACK_COMMANDS_MESSAGE = "Please choose: u (use) / d (drop)";
 
     private static final String DEAD_PLAYER_MESSAGE = "You died!";
 
     private static final String MAX_NUMBER_OF_PLAYERS_REACHED = "Max number of players reached. Please try later.";
-
 
     private static final NetworkServer networkServer = NetworkServer.getInstance();
     private static final PlayersConnectionStorage playersConnectionStorage = PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
@@ -62,45 +63,44 @@ public class DungeonsOnlineServer {
         }
 
         PlayerCommand command = PlayerCommand.fromString(playerRequest.command());
-        if (command == null) {
-            return;
-        }
 
-        SocketChannel client = playerRequest.client();
+        SocketChannel playerClient = playerRequest.client();
 
         try {
-            String commandResult = executeCommandForPlayer(command, client);
+            String resultOfCommandExecution = executeCommandForPlayer(command, playerClient);
 
-            if (commandResult != null) {
-                networkServer.writeToClient(commandResult, client);
+            if (resultOfCommandExecution != null) {
+                networkServer.writeToClient(resultOfCommandExecution, playerClient);
             }
 
             removeDisconnectedPlayersFromGame();
             displayNewGameFrameToPlayers();
         } catch (IOException e) {
-            if (playersConnectionStorage.isPlayerConnected(client)) {
-                endPlayerSession(client);
+            if (playersConnectionStorage.isPlayerClientConnected(playerClient)) {
+                endPlayerClientSession(playerClient);
             }
-        } catch (MaxNumberOfPlayersReachedException e) {
-            networkServer.writeToClient(MAX_NUMBER_OF_PLAYERS_REACHED, client);
         }
     }
 
     private void removeDisconnectedPlayersFromGame() {
-        for (SocketChannel players : playersConnectionStorage.getPlayersSocketChannels()) {
-            if (!players.isOpen()) {
-                gameEngine.unSummonPlayerHero(playersConnectionStorage.playerHero(players));
+        for (SocketChannel playerClient : playersConnectionStorage.getPlayersSocketChannels()) {
+            if (!playerClient.isOpen()) {
+                gameEngine.unSummonPlayerHero(playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient));
             }
         }
 
         playersConnectionStorage.removePlayersWithInterruptedConnection();
     }
 
-    private String executeCommandForPlayer(PlayerCommand command, SocketChannel client)
-        throws IOException, MaxNumberOfPlayersReachedException {
+    private String executeCommandForPlayer(PlayerCommand command, SocketChannel client) throws IOException {
+
+        if (command == null) {
+            return WRONG_COMMAND_MESSAGE;
+        }
+
         switch (command) {
             case START -> { return startPlayerSession(client); }
-            case DISCONNECT -> { endPlayerSession(client); }
+            case DISCONNECT -> { endPlayerClientSession(client); }
             case BACKPACK -> { return executeCommandOnPlayerBackpack(client); }
 
             case UP -> { return executePlayerMoveInGivenDirection(client, Direction.UP); }
@@ -108,13 +108,13 @@ public class DungeonsOnlineServer {
             case LEFT -> { return executePlayerMoveInGivenDirection(client, Direction.LEFT); }
             case RIGHT -> { return executePlayerMoveInGivenDirection(client, Direction.RIGHT); }
 
-            default -> { return WRONG_COMMAND_MESSAGE; }
+            default -> { return UNKNOWN_COMMAND; }
         }
 
         return null; //in case of endPlayerSession
     }
 
-    private String startPlayerSession(SocketChannel client) throws IOException, MaxNumberOfPlayersReachedException {
+    private String startPlayerSession(SocketChannel client) throws IOException {
         networkServer.writeToClient(ENTER_YOUR_NAME_MESSAGE, client);
 
         String heroName;
@@ -122,55 +122,71 @@ public class DungeonsOnlineServer {
             heroName = networkServer.readFromClient(client);
         } while (heroName == null);
 
-        Hero newHero = new Hero(heroName, START_HERO_STATS);
-        playersConnectionStorage.connectPlayer(client, newHero);
+        Hero newHero = new Hero(heroName, getStartingPlayerStats());
+
+        try {
+            playersConnectionStorage.connectPlayer(client, newHero);
+        } catch (MaxNumberOfPlayersReachedException e) {
+            return MAX_NUMBER_OF_PLAYERS_REACHED;
+        }
+
         gameEngine.summonPlayerHero(newHero);
 
         return GAME_ON_MESSAGE;
     }
 
-    private void endPlayerSession(SocketChannel client) throws IOException {
-        networkServer.writeToClient(DISCONNECT_MESSAGE, client);
-        gameEngine.unSummonPlayerHero(playersConnectionStorage.playerHero(client));
-        playersConnectionStorage.disconnectPlayer(client);
-        client.close();
+    private Stats getStartingPlayerStats() {
+        return new Stats(
+            PLAYER_STARTING_HEALTH,
+            PLAYER_STARTING_MANA,
+            PLAYER_STARTING_ATTACK,
+            PLAYER_STARTING_DEFENSE
+        );
     }
 
-    private String executeCommandOnPlayerBackpack(SocketChannel client) throws IOException {
-        Hero hero = playersConnectionStorage.playerHero(client);
-        Backpack backpack = hero.backpack();
+    private void endPlayerClientSession(SocketChannel playerClient) throws IOException {
+        networkServer.writeToClient(DISCONNECT_MESSAGE, playerClient);
+        gameEngine.unSummonPlayerHero(playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient));
+        //TODO problem with dying
+        playersConnectionStorage.disconnectPlayerClient(playerClient);
+        playerClient.close();
+    }
 
-        int treasureIndex = getTreasureFromBackpackIndexFromPlayer(client);
+    private String executeCommandOnPlayerBackpack(SocketChannel playerClient) throws IOException {
+        Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
+        Backpack heroBackpack = playerHero.backpack();
+
+        int treasureIndex = getTreasureInBackpackIndexFromPlayer(playerClient);
         if (treasureIndex == -1) { // cancelled
             return null;
         }
 
-        Treasure treasure = backpack.remove(treasureIndex);
+        Treasure treasure = heroBackpack.remove(treasureIndex);
 
-        networkServer.writeToClient(BACKPACK_FUNCTION_MESSAGE, client);
+        networkServer.writeToClient(BACKPACK_COMMANDS_MESSAGE, playerClient);
 
-        String commandToBackpackStr;
+        String commandToTreasureString;
         do {
-            commandToBackpackStr = networkServer.readFromClient(client);
-        } while (commandToBackpackStr == null
-            || !(commandToBackpackStr.equals(PlayerCommand.DROP.toString())
-            || commandToBackpackStr.equals(PlayerCommand.USE.toString())));
+            commandToTreasureString = networkServer.readFromClient(playerClient);
+        } while (commandToTreasureString == null
+            || !(commandToTreasureString.equals(PlayerCommand.DROP.toString()) ||
+                 commandToTreasureString.equals(PlayerCommand.USE.toString())));
 
-        PlayerCommand commandToBackpack = PlayerCommand.fromString(commandToBackpackStr);
-        return gameEngine.executeCommandOnHeroTreasure(commandToBackpack, hero, treasure);
+        PlayerCommand commandToTreasure = PlayerCommand.fromString(commandToTreasureString);
+        return gameEngine.executeCommandOnHeroTreasure(commandToTreasure, playerHero, treasure);
     }
 
-    private int getTreasureFromBackpackIndexFromPlayer(SocketChannel client) throws IOException {
-        networkServer.writeToClient(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, client);
+    private int getTreasureInBackpackIndexFromPlayer(SocketChannel playerClient) throws IOException {
+        networkServer.writeToClient(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, playerClient);
 
-        Hero playerHero = playersConnectionStorage.playerHero(client);
+        Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
 
-        networkServer.writeToClient(playerHero.backpack().toString(), client);
+        networkServer.writeToClient(playerHero.backpack().toString(), playerClient);
 
         String treasureIndexStr;
         int treasureIndex = 0;
         do {
-            treasureIndexStr = networkServer.readFromClient(client);
+            treasureIndexStr = networkServer.readFromClient(playerClient);
             if (treasureIndexStr == null) {
                 continue;
             }
@@ -181,99 +197,87 @@ public class DungeonsOnlineServer {
             try {
                 treasureIndex = Integer.parseInt(treasureIndexStr.trim());
             } catch (NumberFormatException e) {
-                networkServer.writeToClient(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, client);
+                networkServer.writeToClient(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, playerClient);
             }
         } while (treasureIndex <= 0 || treasureIndex > playerHero.backpack().size());
 
         return treasureIndex - 1;
     }
 
-    private String executePlayerMoveInGivenDirection(SocketChannel client, Direction direction) throws IOException {
-        Hero hero = null;
-        if (playersConnectionStorage.isPlayerConnected(client)) {
-            hero = playersConnectionStorage.playerHero(client);
-        }
+    private String executePlayerMoveInGivenDirection(SocketChannel playerClient, Direction direction)
+        throws IOException {
+        Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
 
-        String moveHeroResult = gameEngine.moveHero(hero, direction);
+        String moveHeroResult = gameEngine.moveHero(playerHero, direction);
 
         if (moveHeroResult.equals(GameEngine.STEP_ON_TREASURE_STATUS)) {
-            return interactWithTreasure(client);
+            return interactWithTreasure(playerClient);
         }
 
-        if (moveHeroResult.contains(GameEngine.STEP_ON_PLAYER_STATUS)) {
-            //"player" followed by his hero symbol. For example "player 4".
-            Hero otherHero = playersConnectionStorage.getPlayerHeroByHeroSymbol((moveHeroResult.split(" ")[1].charAt(0)));
-            return interactWithPlayerHero(client, otherHero);
+        if (moveHeroResult.startsWith(GameEngine.STEP_ON_HERO_STATUS)) {
+            // Here moveHeroResult = *stepped on hero status string* followed by that hero's symbol.
+            char otherHeroSymbol = moveHeroResult.charAt(moveHeroResult.length() - 1);
+
+            Hero otherHero = playersConnectionStorage.getPlayerHeroByHeroSymbol(otherHeroSymbol);
+            return playerInteractWithAnotherPlayerHero(playerClient, otherHero);
         }
 
         return moveHeroResult;
     }
 
-    private String interactWithTreasure(SocketChannel client) throws IOException {
+    private String interactWithTreasure(SocketChannel playerClient) throws IOException {
         Treasure treasure = staticObjectStorage.getTreasure();
-        networkServer.writeToClient(String.format(TREASURE_INTERACTION_MESSAGE, treasure.toString()), client);
+        networkServer.writeToClient(String.format(TREASURE_INTERACTION_MESSAGE, treasure.toString()), playerClient);
 
         String commandToTreasure;
         do {
-            commandToTreasure = networkServer.readFromClient(client);
+            commandToTreasure = networkServer.readFromClient(playerClient);
         } while (commandToTreasure == null
-            || !(commandToTreasure.equals(PlayerCommand.CONSUME.toString())
-            || commandToTreasure.equals(PlayerCommand.COLLECT.toString())));
+            || !(commandToTreasure.equals(PlayerCommand.CONSUME.toString()) ||
+                 commandToTreasure.equals(PlayerCommand.COLLECT.toString())));
 
+        Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
         if (commandToTreasure.equals(PlayerCommand.CONSUME.toString())) {
-            return clientHeroTryConsumingTreasure(client, treasure);
+            return gameEngine.heroTryConsumingTreasure(playerHero, treasure);
         } else {
-            return addTreasureToClientHeroBackpack(client, treasure);
+            return gameEngine.collectTreasureToHeroBackpack(treasure, playerHero);
         }
     }
 
-    private String addTreasureToClientHeroBackpack(SocketChannel client, Treasure item) {
-        playersConnectionStorage.playerHero(client).collectTreasure(item);
+    private String playerInteractWithAnotherPlayerHero(SocketChannel playerClient, Hero otherHero) throws IOException {
+        Hero initiatorHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
+        networkServer.writeToClient(String.format(PLAYER_INTERACTION_MESSAGE, otherHero.getName()), playerClient);
 
-        return String.format(TREASURE_COLLECTED_TO_BACKPACK_MESSAGE, item.toString());
-    }
-
-    private String clientHeroTryConsumingTreasure(SocketChannel client, Treasure treasure) {
-        String collectResult = treasure.collect(playersConnectionStorage.playerHero(client));
-
-        if (collectResult.equals(BaseSkill.CANT_EQUIP_MESSAGE)) {
-            return collectResult + System.lineSeparator() + addTreasureToClientHeroBackpack(client, treasure);
-        }
-
-        return collectResult;
-    }
-
-    private String interactWithPlayerHero(SocketChannel client, Hero otherHero) throws IOException {
-        Hero interactingHero = playersConnectionStorage.playerHero(client);
-        networkServer.writeToClient(String.format(PLAYER_INTERACTION_MESSAGE, otherHero.getName()), client);
-
-        String commandToInteractStr;
+        String commandToInteractString;
         do {
-            commandToInteractStr = networkServer.readFromClient(client);
-        } while (commandToInteractStr == null
-            || !(commandToInteractStr.equals(PlayerCommand.ATTACK.toString())
-            || commandToInteractStr.equals(PlayerCommand.TRADE.toString())));
+            commandToInteractString = networkServer.readFromClient(playerClient);
+        } while (commandToInteractString == null
+            || !(commandToInteractString.equals(PlayerCommand.ATTACK.toString()) ||
+                 commandToInteractString.equals(PlayerCommand.TRADE.toString())));
 
-        if (commandToInteractStr.equals(PlayerCommand.ATTACK.toString())) {
-            return gameEngine.battleWithPlayer(interactingHero, otherHero);
+        if (commandToInteractString.equals(PlayerCommand.ATTACK.toString())) {
+            return gameEngine.battleWithAnotherHero(initiatorHero, otherHero);
         } else {
-            int treasureIndex = getTreasureFromBackpackIndexFromPlayer(client);
+            int treasureIndex = getTreasureInBackpackIndexFromPlayer(playerClient);
             if (treasureIndex == -1) { // cancelled
                 return null;
             }
-            return gameEngine.tradeWithPlayer(interactingHero, otherHero, treasureIndex);
+            return gameEngine.tradeTreasureWithAnotherHero(initiatorHero, otherHero, treasureIndex);
         }
     }
 
     private void displayNewGameFrameToPlayers() throws IOException {
-        for (SocketChannel player : playersConnectionStorage.getPlayersSocketChannels()) {
-            if (playersConnectionStorage.playerHero(player).isAlive()) {
-
-                networkServer.writeToClient(gameEngine.getMapToVisualize(), player);
-                networkServer.writeToClient(playersConnectionStorage.playerHero(player).toString(), player); //TODO proper UI
+        System.out.println(playersConnectionStorage.getPlayersSocketChannels());
+        //TODO remove using iterator so concurrentModification is not thrown
+        for (SocketChannel playerClient : playersConnectionStorage.getPlayersSocketChannels()) {
+            System.out.println(playerClient);
+            if (playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient).isAlive()) {
+                networkServer.writeToClient(gameEngine.getMapToVisualize(), playerClient);
+                Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
+                networkServer.writeToClient(playerHero.toString(), playerClient);
             } else {
-                networkServer.writeToClient(DEAD_PLAYER_MESSAGE, player);
-                endPlayerSession(player);
+                networkServer.writeToClient(DEAD_PLAYER_MESSAGE, playerClient);
+                endPlayerClientSession(playerClient);
             }
         }
     }

@@ -10,7 +10,7 @@ public final class Weapon extends BaseSkill{
     }
 
     @Override
-    public String collect(Hero hero) {
+    public String consume(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {

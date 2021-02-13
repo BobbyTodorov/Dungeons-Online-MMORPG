@@ -33,7 +33,7 @@ public class PlayersConnectionStorageTest {
 
     @After
     public void disconnectTestSocketChannel() {
-        testPlayersConnectionStorage.disconnectPlayer(testSocketChannel);
+        testPlayersConnectionStorage.disconnectPlayerClient(testSocketChannel);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -59,7 +59,7 @@ public class PlayersConnectionStorageTest {
             }
         } finally {
             for (SocketChannel connectedSocketChannel : connectedSocketChannels) {
-                testPlayersConnectionStorage.disconnectPlayer(connectedSocketChannel);
+                testPlayersConnectionStorage.disconnectPlayerClient(connectedSocketChannel);
             }
         }
     }
@@ -69,29 +69,29 @@ public class PlayersConnectionStorageTest {
         testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
 
         assertTrue("connectPlayer must add player to connected players",
-            testPlayersConnectionStorage.isPlayerConnected(testSocketChannel));
+            testPlayersConnectionStorage.isPlayerClientConnected(testSocketChannel));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testDisconnectPlayerWithNullArgument() {
-        testPlayersConnectionStorage.disconnectPlayer(null);
+        testPlayersConnectionStorage.disconnectPlayerClient(null);
     }
 
     @Test
     public void testDisconnectPlayerSuccess() throws MaxNumberOfPlayersReachedException {
-        testPlayersConnectionStorage.disconnectPlayer(testSocketChannel); //should do nothing, that's okay
+        testPlayersConnectionStorage.disconnectPlayerClient(testSocketChannel); //should do nothing, that's okay
 
         testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
 
-        testPlayersConnectionStorage.disconnectPlayer(testSocketChannel);
+        testPlayersConnectionStorage.disconnectPlayerClient(testSocketChannel);
 
         assertFalse("disconnectPlayer must remove player from connected players",
-            testPlayersConnectionStorage.isPlayerConnected(testSocketChannel));
+            testPlayersConnectionStorage.isPlayerClientConnected(testSocketChannel));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGetPlayerHeroWithNullArgument() {
-        testPlayersConnectionStorage.playerHero(null);
+        testPlayersConnectionStorage.getPlayerHeroOfGivenPlayerClient(null);
     }
 
     @Test
@@ -99,21 +99,21 @@ public class PlayersConnectionStorageTest {
         testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
 
         assertEquals("getPlayerHero must return correct hero associated with player's socket channel",
-            testHero, testPlayersConnectionStorage.playerHero(testSocketChannel));
+            testHero, testPlayersConnectionStorage.getPlayerHeroOfGivenPlayerClient(testSocketChannel));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testIsPlayerConnectedPlayerHeroWithNullArgument() {
-        testPlayersConnectionStorage.isPlayerConnected(null);
+        testPlayersConnectionStorage.isPlayerClientConnected(null);
     }
 
     @Test
     public void testIsPlayerConnectedSuccess() throws MaxNumberOfPlayersReachedException {
-        assertFalse(testPlayersConnectionStorage.isPlayerConnected(testSocketChannel));
+        assertFalse(testPlayersConnectionStorage.isPlayerClientConnected(testSocketChannel));
 
         testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
 
-        assertTrue(testPlayersConnectionStorage.isPlayerConnected(testSocketChannel));
+        assertTrue(testPlayersConnectionStorage.isPlayerClientConnected(testSocketChannel));
     }
 
     @Test

@@ -1,8 +1,6 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion.ManaPotion;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.potion.PotionSize;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,7 +43,7 @@ public class SpellTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testSpell.collect(null);
+        testSpell.consume(null);
     }
 
     @Test
@@ -53,7 +51,7 @@ public class SpellTest {
         when(testHero.getLevel()).thenReturn(1);
 
         assertEquals("collect with lower hero level must not call learn to spell",
-            "Spell level is too high for you to equip.", testSpell.collect(testHero));
+            "Spell level is too high for you to equip.", testSpell.consume(testHero));
 
         verify(testHero, times(0)).learn(testSpell);
     }
@@ -63,7 +61,7 @@ public class SpellTest {
         when(testHero.getLevel()).thenReturn(3);
 
         assertEquals("collect with higher hero level must call learn to spell",
-            "Learned Spell  Level: 2 Damage points: 2, Mana cost: 1", testSpell.collect(testHero));
+            "Learned Spell  Level: 2 Damage points: 2, Mana cost: 1", testSpell.consume(testHero));
 
         verify(testHero).learn(testSpell);
     }

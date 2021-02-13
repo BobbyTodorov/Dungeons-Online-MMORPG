@@ -10,7 +10,7 @@ public class Position {
         this.coordinate = coordinate;
     }
 
-    public Coordinate getCoordinate() {
+    public Coordinate coordinate() {
         return coordinate;
     }
 

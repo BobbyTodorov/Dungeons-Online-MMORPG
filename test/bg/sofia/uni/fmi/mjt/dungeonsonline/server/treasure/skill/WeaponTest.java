@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
@@ -25,7 +24,7 @@ public class WeaponTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testWeapon.collect(null);
+        testWeapon.consume(null);
     }
 
     @Test
@@ -33,7 +32,7 @@ public class WeaponTest {
         when(testHero.getLevel()).thenReturn(1);
 
         assertEquals("collect with lower hero level must not call equip to weapon",
-            "Weapon level is too high for you to equip.", testWeapon.collect(testHero));
+            "Weapon level is too high for you to equip.", testWeapon.consume(testHero));
 
         verify(testHero, times(0)).equip(testWeapon);
     }
@@ -43,7 +42,7 @@ public class WeaponTest {
         when(testHero.getLevel()).thenReturn(3);
 
         assertEquals("collect with higher hero level must call equip to weapon",
-            "Equipped Weapon  Level: 2 Damage points: 2", testWeapon.collect(testHero));
+            "Equipped Weapon  Level: 2 Damage points: 2", testWeapon.consume(testHero));
 
         verify(testHero).equip(testWeapon);
     }

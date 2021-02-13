@@ -25,7 +25,7 @@ public final class HealthPotion extends BasePotion {
         }
     }
 
-    public String collect(Hero hero) {
+    public String consume(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.takeHealing(this.heal());

@@ -14,7 +14,7 @@ public class PositionTest {
         Position newPosition = Position.createPosition(oldPosition, Direction.LEFT);
 
         assertEquals("createPosition should return correct position to the left",
-            new Coordinate(0, 1), newPosition.getCoordinate());
+            new Coordinate(0, 1), newPosition.coordinate());
     }
 
     @Test
@@ -24,7 +24,7 @@ public class PositionTest {
         Position newPosition = Position.createPosition(oldPosition, Direction.RIGHT);
 
         assertEquals("createPosition should return correct position to the right",
-            new Coordinate(2, 1), newPosition.getCoordinate());
+            new Coordinate(2, 1), newPosition.coordinate());
     }
 
     @Test
@@ -34,7 +34,7 @@ public class PositionTest {
         Position newPosition = Position.createPosition(oldPosition, Direction.UP);
 
         assertEquals("createPosition should return correct position to up",
-            new Coordinate(1, 0), newPosition.getCoordinate());
+            new Coordinate(1, 0), newPosition.coordinate());
     }
 
     @Test
@@ -44,6 +44,6 @@ public class PositionTest {
         Position newPosition = Position.createPosition(oldPosition, Direction.DOWN);
 
         assertEquals("createPosition should return correct position to down",
-            new Coordinate(1, 2), newPosition.getCoordinate());
+            new Coordinate(1, 2), newPosition.coordinate());
     }
 }

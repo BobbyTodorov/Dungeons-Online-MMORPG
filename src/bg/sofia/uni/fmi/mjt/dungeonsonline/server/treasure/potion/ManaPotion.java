@@ -24,7 +24,7 @@ public final class ManaPotion extends BasePotion{
         }
     }
 
-    public String collect(Hero hero) {
+    public String consume(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         hero.takeMana(this.heal());

@@ -59,8 +59,9 @@ public abstract class BaseActor implements Actor {
 
     @Override
     public int attack() {
-        int weaponDamage = stats.getAttack();
-        int spellDamage = stats.getAttack();
+        int baseDamage = stats.getAttack();
+        int weaponDamage = baseDamage;
+        int spellDamage = baseDamage;
 
         if (getWeapon() != null) {
             weaponDamage += getWeapon().getDamage();

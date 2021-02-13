@@ -37,7 +37,7 @@ public class Logger {
     }
 
     public void log(String data) throws IOException {
-        writer.write(formatter.format(date) + data + System.lineSeparator() + " ");
+        writer.write(formatter.format(date) + System.lineSeparator() + data + System.lineSeparator() + " ");
         writer.flush();
     }
 }

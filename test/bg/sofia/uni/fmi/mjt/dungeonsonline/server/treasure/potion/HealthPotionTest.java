@@ -41,12 +41,12 @@ public class HealthPotionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testHealthPotion.collect(null);
+        testHealthPotion.consume(null);
     }
 
     @Test
     public void testCollectSuccess() {
-        testHealthPotion.collect(testHero);
+        testHealthPotion.consume(testHero);
 
         verify(testHero).takeHealing(50);
     }

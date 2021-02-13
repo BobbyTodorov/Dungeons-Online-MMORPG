@@ -6,21 +6,17 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Backpack;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Direction;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Position;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Coordinate;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Map;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GameEngineTest {
@@ -108,12 +104,12 @@ public class GameEngineTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testBattleWithPlayerWithNullInitiatorArgument() {
-        testGameEngine.battleWithPlayer(null, testHero);
+        testGameEngine.battleWithAnotherHero(null, testHero);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBattleWithPlayerWithNullEnemyArgument() {
-        testGameEngine.battleWithPlayer(testHero, null);
+        testGameEngine.battleWithAnotherHero(testHero, null);
     }
 
     @Test
@@ -121,7 +117,7 @@ public class GameEngineTest {
         Hero testStrongerInitiator = new Hero("", new Stats(1000, 1000, 1000, 1000));
         Hero testWeakerEnemy = new Hero("", new Stats(1, 1, 1 ,1));
 
-        String actual = testGameEngine.battleWithPlayer(testStrongerInitiator, testWeakerEnemy);
+        String actual = testGameEngine.battleWithAnotherHero(testStrongerInitiator, testWeakerEnemy);
         String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1000/1000, mana=1000/1000, attackPoints=1000, " +
             "defensePoints=1000}, weapon=null, spell=null, experience=0} VS Hero 0 {name=, level=1, stats=health=1/1, " +
             "mana=1/1, attackPoints=1, defensePoints=1}, weapon=null, spell=null, experience=0}" +
@@ -135,7 +131,7 @@ public class GameEngineTest {
         Hero testWeakerInitiator = new Hero("", new Stats(1, 1, 1, 1));
         Hero testStrongerEnemy = new Hero("", new Stats(1000, 1000, 1000 ,1000));
 
-        String actual = testGameEngine.battleWithPlayer(testWeakerInitiator, testStrongerEnemy);
+        String actual = testGameEngine.battleWithAnotherHero(testWeakerInitiator, testStrongerEnemy);
         String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1/1, mana=1/1, attackPoints=1, defensePoints=1}, " +
             "weapon=null, spell=null, experience=0} VS Hero 0 {name=, level=1, stats=health=1000/1000, mana=1000/1000, " +
             "attackPoints=1000, defensePoints=1000}, weapon=null, spell=null, experience=0}" +
@@ -146,17 +142,17 @@ public class GameEngineTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testTradeWithPlayerWithNullInitiatorArgument() {
-        testGameEngine.tradeWithPlayer(null, testHero, 0);
+        testGameEngine.tradeTreasureWithAnotherHero(null, testHero, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTradeWithPlayerWithNullOtherHeroArgument() {
-        testGameEngine.tradeWithPlayer(testHero, null, 0);
+        testGameEngine.tradeTreasureWithAnotherHero(testHero, null, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testTradeWithPlayerWithNegativeTreasureIndexArgument() {
-        testGameEngine.tradeWithPlayer(null, testHero, -1);
+        testGameEngine.tradeTreasureWithAnotherHero(null, testHero, -1);
     }
 
     @Test
@@ -165,7 +161,7 @@ public class GameEngineTest {
         Hero otherHero = new Hero("", testStats);
         testInitiator.collectTreasure(testTreasure);
 
-        String actual = testGameEngine.tradeWithPlayer(testInitiator, otherHero, 0);
+        String actual = testGameEngine.tradeTreasureWithAnotherHero(testInitiator, otherHero, 0);
 
         assertEquals("tradeWithPlayer should remove treasure from initiator's backpack and add it to otherHero's",
             "Traded Spell{name=', damage=1, level=1 MANA_COST=1} with .", actual);
