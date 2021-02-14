@@ -60,8 +60,11 @@ public class GameEngine {
     public void unSummonPlayerHero(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
-        //map.changeRandomFieldWithGivenSymbolToAnother(getHeroSymbol(hero), Map.FREE_FIELD_SYMBOL);
-        map.changeGivenFieldByCoordinatesSymbol(hero.positionOnMap().coordinate(), Map.FREE_FIELD_SYMBOL);
+        // if hero's field was not changed before unSummoning, do unSummon
+        Coordinate heroCoordinatesOnMap = hero.positionOnMap().coordinate();
+        if (map.getFieldSymbol(heroCoordinatesOnMap) == hero.getSymbolToVisualizeOnMap()) {
+            map.changeGivenFieldByCoordinatesSymbol(heroCoordinatesOnMap, Map.FREE_FIELD_SYMBOL);
+        }
     }
 
     public String moveHero(Hero hero, Direction direction) {
@@ -112,14 +115,14 @@ public class GameEngine {
 
         while(true){
             enemy.takeDamage(initiator.attack());
-            String resultAfterHit = checkIfHeroHasKilledAnotherHero(initiator, enemy);
+            String resultAfterHit = performKillIfEnemyIsNotAlive(initiator, enemy);
             if (resultAfterHit != null) {
                 battleResult.append(resultAfterHit);
                 break;
             }
 
             initiator.takeDamage(enemy.attack());
-            String resultAfterBeingHit = checkIfHeroHasKilledAnotherHero(enemy, initiator);
+            String resultAfterBeingHit = performKillIfEnemyIsNotAlive(enemy, initiator);
             if (resultAfterBeingHit != null) {
                 battleResult.append(resultAfterBeingHit);
                 break;
@@ -139,13 +142,13 @@ public class GameEngine {
     }
 
     public String heroTryConsumingTreasure(Hero hero, Treasure treasure) {
-        String collectResult = treasure.consume(hero);
+        String consumeResult = treasure.consume(hero);
 
-        if (collectResult.equals(BaseSkill.CANT_EQUIP_MESSAGE)) {
-            return collectResult + System.lineSeparator() + collectTreasureToHeroBackpack(treasure, hero);
+        if (consumeResult.equals(BaseSkill.CANT_EQUIP_MESSAGE)) {
+            return consumeResult + System.lineSeparator() + collectTreasureToHeroBackpack(treasure, hero);
         }
 
-        return collectResult;
+        return consumeResult;
     }
 
     public String collectTreasureToHeroBackpack(Treasure treasure, Hero hero) {
@@ -171,9 +174,9 @@ public class GameEngine {
 
         if (battleWithMinion(initiator, enemyMinion)) {
             moveHeroToPosition(initiator, currentPosition, newPosition);
-            return battleString + String.format(YOU_WON_MESSAGE, initiator.getName());
+            return battleString + YOU_WON_MESSAGE;
         } else {
-            return battleString + String.format(YOU_WON_MESSAGE, enemyMinion.getName());
+            return battleString + DEAD_PLAYER_MESSAGE;
         }
     }
 
@@ -193,7 +196,7 @@ public class GameEngine {
         }
     }
 
-    private String checkIfHeroHasKilledAnotherHero(Hero hero1, Hero hero2) {
+    private String performKillIfEnemyIsNotAlive(Hero hero1, Hero hero2) {
         if(!hero2.isAlive()) {
             hero1.gainExperience(EXPERIENCE_PER_KILLING_HERO);
 
@@ -203,7 +206,7 @@ public class GameEngine {
                 dropTreasureFromHero(hero2, hero2.backpack().remove(0));
             }
 
-            return String.format(YOU_WON_MESSAGE, hero1.getName());
+            return YOU_WON_MESSAGE;
         }
 
         return null;

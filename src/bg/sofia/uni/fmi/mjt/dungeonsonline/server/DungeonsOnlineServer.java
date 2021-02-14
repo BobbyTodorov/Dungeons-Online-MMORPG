@@ -146,8 +146,8 @@ public class DungeonsOnlineServer {
 
     private void endPlayerClientSession(SocketChannel playerClient) throws IOException {
         networkServer.writeToClient(DISCONNECT_MESSAGE, playerClient);
+
         gameEngine.unSummonPlayerHero(playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient));
-        //TODO problem with dying
         playersConnectionStorage.disconnectPlayerClient(playerClient);
         playerClient.close();
     }
@@ -219,7 +219,7 @@ public class DungeonsOnlineServer {
             char otherHeroSymbol = moveHeroResult.charAt(moveHeroResult.length() - 1);
 
             Hero otherHero = playersConnectionStorage.getPlayerHeroByHeroSymbol(otherHeroSymbol);
-            return playerInteractWithAnotherPlayerHero(playerClient, otherHero);
+            return playerInteractWithAnotherHero(playerClient, otherHero);
         }
 
         return moveHeroResult;
@@ -244,7 +244,7 @@ public class DungeonsOnlineServer {
         }
     }
 
-    private String playerInteractWithAnotherPlayerHero(SocketChannel playerClient, Hero otherHero) throws IOException {
+    private String playerInteractWithAnotherHero(SocketChannel playerClient, Hero otherHero) throws IOException {
         Hero initiatorHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
         networkServer.writeToClient(String.format(PLAYER_INTERACTION_MESSAGE, otherHero.getName()), playerClient);
 
@@ -267,18 +267,25 @@ public class DungeonsOnlineServer {
     }
 
     private void displayNewGameFrameToPlayers() throws IOException {
-        System.out.println(playersConnectionStorage.getPlayersSocketChannels());
-        //TODO remove using iterator so concurrentModification is not thrown
         for (SocketChannel playerClient : playersConnectionStorage.getPlayersSocketChannels()) {
-            System.out.println(playerClient);
-            if (playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient).isAlive()) {
-                networkServer.writeToClient(gameEngine.getMapToVisualize(), playerClient);
-                Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
-                networkServer.writeToClient(playerHero.toString(), playerClient);
+            Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
+
+            if (playerHero.isAlive()) {
+                displayMapToPlayerClient(playerClient);
+                displayHeroInfoToPlayerClient(playerClient, playerHero);
             } else {
                 networkServer.writeToClient(DEAD_PLAYER_MESSAGE, playerClient);
-                endPlayerClientSession(playerClient);
+                networkServer.writeToClient(DISCONNECT_MESSAGE, playerClient);
+                playerClient.close();
             }
         }
+    }
+
+    private void displayMapToPlayerClient(SocketChannel playerClient) throws IOException {
+        networkServer.writeToClient(gameEngine.getMapToVisualize(), playerClient);
+    }
+
+    private void displayHeroInfoToPlayerClient(SocketChannel playerClient, Hero hero) throws IOException {
+        networkServer.writeToClient(hero.toString(), playerClient);
     }
 }

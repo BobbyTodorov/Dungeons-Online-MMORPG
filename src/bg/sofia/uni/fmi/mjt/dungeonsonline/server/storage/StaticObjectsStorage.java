@@ -112,7 +112,6 @@ public class StaticObjectsStorage {
     }
 
     public Treasure getTreasure() {
-        System.out.println(TOTAL_NUMBER_OF_TREASURES);
         return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES)); }
 
     public Minion getMinion() {
