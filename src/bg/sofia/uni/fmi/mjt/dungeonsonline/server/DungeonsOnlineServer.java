@@ -27,8 +27,8 @@ public class DungeonsOnlineServer {
     private static final String ENTER_YOUR_NAME_MESSAGE = "Enter your name: ";
     private static final String GAME_ON_MESSAGE = "Game On!";
     private static final String DISCONNECT_MESSAGE = System.lineSeparator() + "You are being disconnected.";
-    private static final String WRONG_COMMAND_MESSAGE = "Wrong command.";
-    private static final String UNKNOWN_COMMAND = "Unknown command.";
+    private static final String WRONG_COMMAND_MESSAGE = "Wrong message.";
+    private static final String UNKNOWN_COMMAND = "Unknown message.";
 
     private static final String TREASURE_INTERACTION_MESSAGE = "%s found. c (consume) / b (to backpack).";
     private static final String PLAYER_INTERACTION_MESSAGE =
@@ -42,29 +42,53 @@ public class DungeonsOnlineServer {
     private static final String MAX_NUMBER_OF_PLAYERS_REACHED = "Max number of players reached. Please try later.";
 
     private static final NetworkServer networkServer = NetworkServer.getInstance();
-    private static final PlayersConnectionStorage playersConnectionStorage = PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
+    private static final PlayersConnectionStorage playersConnectionStorage =
+        PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
     private static final GameEngine gameEngine = GameEngine.getInstance();
     private static final StaticObjectsStorage staticObjectStorage = StaticObjectsStorage.getInstance();
 
-    public static void main(String[] args) throws IOException {
-        new DungeonsOnlineServer().start();
+    private boolean isRunning;
+
+    public static void main(String[] args) {
+        DungeonsOnlineServer test =  new DungeonsOnlineServer();
+        test.start();
     }
 
-    public void start() throws IOException {
+    public void start() {
+        isRunning = true;
         networkServer.start();
-        while(true) {
-            processPlayerRequest(networkServer.pollClientRequest());
+
+        new Thread(this::run).start();
+    }
+
+    public void stop() {
+        isRunning = false;
+        networkServer.stop();
+        //TODO save status with json
+    }
+
+    private void run() {
+        while(isRunning) {
+            ClientRequest playerRequest = networkServer.pollNextClientRequest();
+
+            if (playerRequest == null) {
+                continue;
+            }
+
+            new Thread(() -> {
+                try {
+                    processPlayerRequest(playerRequest);
+                } catch (IOException ioException) {
+                    throw new RuntimeException("processing player request failed");
+                }
+            }).start();
         }
     }
 
     private void processPlayerRequest(ClientRequest playerRequest) throws IOException {
-        if (playerRequest == null) {
-            return;
-        }
+        PlayerCommand command = PlayerCommand.fromString(playerRequest.message());
 
-        PlayerCommand command = PlayerCommand.fromString(playerRequest.command());
-
-        SocketChannel playerClient = playerRequest.client();
+        SocketChannel playerClient = playerRequest.clientChannel();
 
         try {
             String resultOfCommandExecution = executeCommandForPlayer(command, playerClient);
@@ -114,18 +138,18 @@ public class DungeonsOnlineServer {
         return null; //in case of endPlayerSession
     }
 
-    private String startPlayerSession(SocketChannel client) throws IOException {
-        networkServer.writeToClient(ENTER_YOUR_NAME_MESSAGE, client);
+    private String startPlayerSession(SocketChannel clientChannel) throws IOException {
+        networkServer.writeToClient(ENTER_YOUR_NAME_MESSAGE, clientChannel);
 
         String heroName;
         do {
-            heroName = networkServer.readFromClient(client);
+            heroName = networkServer.readFromClient(clientChannel);
         } while (heroName == null);
 
         Hero newHero = new Hero(heroName, getStartingPlayerStats());
 
         try {
-            playersConnectionStorage.connectPlayer(client, newHero);
+            playersConnectionStorage.connectPlayer(clientChannel, newHero);
         } catch (MaxNumberOfPlayersReachedException e) {
             return MAX_NUMBER_OF_PLAYERS_REACHED;
         }

@@ -27,7 +27,6 @@ public class GameEngine {
     private static final String STEP_ON_OBSTACLE_MESSAGE = "Obstacle there. Hero was not moved.";
     private static final String STEP_ON_BOUND_MESSAGE = "Hero reached bound and was not moved.";
     private static final String INVALID_DIRECTION_MESSAGE = "Invalid direction.";
-    private static final String DEAD_PLAYER_MESSAGE = "You just died.";
 
     private static final int EXPERIENCE_PER_KILLING_HERO = 50;
 
@@ -176,7 +175,7 @@ public class GameEngine {
             moveHeroToPosition(initiator, currentPosition, newPosition);
             return battleString + YOU_WON_MESSAGE;
         } else {
-            return battleString + DEAD_PLAYER_MESSAGE;
+            return battleString;
         }
     }
 

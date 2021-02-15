@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NetworkServer {
 
@@ -32,6 +33,7 @@ public class NetworkServer {
 
     private static final int BUFFER_SIZE = 2048;
     private static final ByteBuffer buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
+
 
     private boolean isRunning;
 
@@ -51,13 +53,7 @@ public class NetworkServer {
         return instance;
     }
 
-    public void addReceivedClientRequest(SocketChannel clientChannel, String request) {
-        ArgumentValidator.checkForNullArguments(clientChannel, request);
-
-        receivedClientRequests.add(new ClientRequest(clientChannel, request));
-    }
-
-    public ClientRequest pollClientRequest() {
+    public ClientRequest pollNextClientRequest() {
         return receivedClientRequests.poll();
     }
 
@@ -94,7 +90,7 @@ public class NetworkServer {
         }
     }
 
-    public String readFromClient(SocketChannel clientChannel) throws IOException {
+    public synchronized String readFromClient(SocketChannel clientChannel) throws IOException {
         buffer.clear();
         if (clientChannel.read(buffer) <= 0) {
             return null;
@@ -105,19 +101,19 @@ public class NetworkServer {
         buffer.get(clientInputBytes);
         String readString = new String(clientInputBytes, StandardCharsets.UTF_8);
 
-        String logString = "Message [" + readString.trim() + "] received from client " + clientChannel.getRemoteAddress();
+        String logString = "Message [" + readString.trim() + "] received from clientChannel " + clientChannel.getRemoteAddress();
         System.out.println(logString);
         logger.log(logString);
 
         return readString.trim();
     }
 
-    public void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
+    public synchronized void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
         buffer.clear();
         buffer.put(msg.getBytes());
         buffer.flip();
 
-        String logString = "Sending message to client: ";
+        String logString = "Sending message to clientChannel: ";
         System.out.println(logString);
         logger.log(logString);
         logString = msg;
@@ -169,6 +165,12 @@ public class NetworkServer {
         }
     }
 
+    private void addReceivedClientRequest(SocketChannel clientChannel, String request) {
+        ArgumentValidator.checkForNullArguments(clientChannel, request);
+
+        receivedClientRequests.add(new ClientRequest(clientChannel, request));
+    }
+
     private void accept(SelectionKey key) throws IOException {
         ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
         SocketChannel clientSocketChannel = serverSocketChannel.accept();
@@ -176,7 +178,7 @@ public class NetworkServer {
         clientSocketChannel.configureBlocking(false);
         clientSocketChannel.register(selector, SelectionKey.OP_READ);
 
-        String logString = "Connection accepted from client " + clientSocketChannel.getRemoteAddress();
+        String logString = "Connection accepted from clientChannel " + clientSocketChannel.getRemoteAddress();
         System.out.println(logString);
         logger.log(logString);
     }
