@@ -190,7 +190,7 @@ public class DungeonsOnlineServer {
         Treasure treasure = heroBackpack.remove(treasureIndex);
 
         sendMessageToSocketChannel(String.format(BACKPACK_TREASURE_COMMANDS_MESSAGE, treasure),
-            MessageType.DIALOG_BEGIN, playerClient);
+            MessageType.DIALOGING, playerClient);
 
         String commandToTreasureString;
         do {
@@ -227,7 +227,7 @@ public class DungeonsOnlineServer {
     private String interactWithTreasure(SocketChannel playerClient) throws IOException {
         Treasure treasure = staticObjectStorage.getTreasure();
         sendMessageToSocketChannel(String.format(TREASURE_INTERACTION_MESSAGE, treasure.toString()),
-            MessageType.DIALOG_BEGIN, playerClient);
+            MessageType.DIALOGING, playerClient);
 
         String commandToTreasure;
         do {
@@ -248,7 +248,7 @@ public class DungeonsOnlineServer {
     private String playerInteractWithAnotherHero(SocketChannel playerClient, Hero otherHero) throws IOException {
         Hero initiatorHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
         sendMessageToSocketChannel(String.format(PLAYER_INTERACTION_MESSAGE, otherHero.getName()),
-            MessageType.DIALOG_BEGIN, playerClient);
+            MessageType.DIALOGING, playerClient);
 
         String commandToInteractString;
         do {
@@ -273,7 +273,7 @@ public class DungeonsOnlineServer {
         Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
 
         sendMessageToSocketChannel(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE + playerHero.backpack().toString(),
-            MessageType.DIALOG_BEGIN, playerClient);
+            MessageType.DIALOGING, playerClient);
 
         String treasureIndexStr;
         int treasureIndex = 0;
@@ -286,7 +286,7 @@ public class DungeonsOnlineServer {
             try {
                 treasureIndex = Integer.parseInt(treasureIndexStr.trim());
             } catch (NumberFormatException e) {
-                sendMessageToSocketChannel(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, MessageType.DIALOG_BEGIN, playerClient);
+                sendMessageToSocketChannel(CHOOSE_INDEX_FROM_BACKPACK_MESSAGE, MessageType.DIALOGING, playerClient);
             }
         } while (treasureIndex <= 0 || treasureIndex > playerHero.backpack().size());
 

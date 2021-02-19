@@ -7,6 +7,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 import java.util.List;
+import java.util.Random;
 
 public class Map {
 
@@ -19,8 +20,11 @@ public class Map {
     public final static char FREE_FIELD_SYMBOL = '.';
     public final static char OBSTACLE_FIELD_SYMBOL = '#';
 
-    private final static int MAP_WIDTH = 60;
+    private final static int MAP_WIDTH = 30;
     private final static int MAP_HEIGHT = 10;
+
+    private final static int NUMBER_OF_WALLS = 20;
+    private final static int MAX_WALL_LENGTH = 5;
 
     private final char[][] matrix;
 
@@ -30,7 +34,8 @@ public class Map {
         ArgumentValidator.checkForNullArguments(staticObjectsStorage);
 
         matrix = new char[MAP_WIDTH][MAP_HEIGHT];
-        // TODO visualizeGivenObjects(List.of(OBSTACLE_SYMBOL));
+
+        createWalls();
         setGivenObjectsSymbolAtRandomFields(staticObjectsStorage.getMinions());
         setGivenObjectsSymbolAtRandomFields(staticObjectsStorage.getTreasures());
         setUninitializedFieldsToFree();
@@ -126,6 +131,46 @@ public class Map {
                 if (matrix[i][j] == UNINITIALIZED_FIELD_SYMBOL) {
                     matrix[i][j] = FREE_FIELD_SYMBOL;
                 }
+            }
+        }
+    }
+
+    private void createWalls() {
+        int wallsCounter = NUMBER_OF_WALLS;
+
+        while (wallsCounter > 0) {
+            int wallLength = new Random().nextInt(MAX_WALL_LENGTH);
+
+            int randHorizontalStartPos = new Random().nextInt(MAP_WIDTH);
+            int randVerticalStartPos = new Random().nextInt(MAP_HEIGHT);
+
+            boolean randomOrientation = new Random().nextBoolean();
+
+            try {
+                if (randomOrientation) {
+                    createHorizontalWall(wallLength, randHorizontalStartPos, randVerticalStartPos);
+                } else {
+                    createVerticalWall(wallLength, randHorizontalStartPos, randVerticalStartPos);
+                }
+            } catch (Exception ignored) {}
+
+            wallsCounter--;
+        }
+    }
+
+    private void createHorizontalWall(int wallLength, int horizontalStartPos, int verticalStartPos) {
+        int modifiedHorizontalWallLength = wallLength*((MAP_WIDTH - MAP_HEIGHT)/10);
+        for (int i = 0; i < modifiedHorizontalWallLength; ++i) {
+            if (matrix[horizontalStartPos + i][verticalStartPos] == UNINITIALIZED_FIELD_SYMBOL) {
+                matrix[horizontalStartPos + i][verticalStartPos] = OBSTACLE_FIELD_SYMBOL;
+            }
+        }
+    }
+
+    private void createVerticalWall(int wallLength, int horizontalStartPos, int verticalStartPos) {
+        for (int i = 0; i < wallLength; ++i) {
+            if (matrix[horizontalStartPos][verticalStartPos + i] == UNINITIALIZED_FIELD_SYMBOL) {
+                matrix[horizontalStartPos][verticalStartPos + i] = OBSTACLE_FIELD_SYMBOL;
             }
         }
     }

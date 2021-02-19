@@ -40,9 +40,9 @@ public class StaticObjectsStorage {
             + NUMBER_OF_SUPERIOR_HEALTH_POTIONS;
     }
 
-    private static final int NUMBER_OF_REGULAR_MANA_POTIONS = 5;
-    private static final int NUMBER_OF_GREATER_MANA_POTIONS = 4;
-    private static final int NUMBER_OF_SUPERIOR_MANA_POTIONS = 3;
+    private static final int NUMBER_OF_REGULAR_MANA_POTIONS = 3;
+    private static final int NUMBER_OF_GREATER_MANA_POTIONS = 2;
+    private static final int NUMBER_OF_SUPERIOR_MANA_POTIONS = 2;
     private static final int TOTAL_NUMBER_OF_MANA_POTIONS;
     static {
         TOTAL_NUMBER_OF_MANA_POTIONS =
@@ -81,12 +81,12 @@ public class StaticObjectsStorage {
 
     private StaticObjectsStorage() {
         minions = new ArrayList<>(TOTAL_NUMBER_OF_MINIONS);
-        initializeMinions();
         Collections.shuffle(minions);
+        initializeMinions();
 
         treasures = new ArrayList<>(TOTAL_NUMBER_OF_TREASURES);
-        initializeTreasures();
         Collections.shuffle(treasures);
+        initializeTreasures();
     }
 
     public static StaticObjectsStorage getInstance() {

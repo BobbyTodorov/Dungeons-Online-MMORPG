@@ -2,12 +2,12 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server;
 
 public enum PlayerCommand {
     START("start"),
-    DISCONNECT("disconnect"),
-    UP("up"),
-    DOWN("down"),
-    LEFT("left"),
-    RIGHT("right"),
-    BACKPACK("backpack"),
+    DISCONNECT("dc"),
+    UP("u"),
+    DOWN("d"),
+    LEFT("l"),
+    RIGHT("r"),
+    BACKPACK("bp"),
     CANCEL("cancel"),
     DROP("d"),
     USE("u"),
