@@ -38,7 +38,7 @@ public abstract class BaseSkill implements Skill {
     @Override
     public String toString() {
         return "name='" + name +
-            ", damage=" + damage +
+            "', damage=" + damage +
             ", level=" + level;
     }
 }

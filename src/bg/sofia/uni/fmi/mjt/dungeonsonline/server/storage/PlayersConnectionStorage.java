@@ -57,6 +57,11 @@ public class PlayersConnectionStorage {
 
     public void disconnectPlayerClient(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
+
+        if (playersSocketChannelToHero.size() <= 0 || !playersSocketChannelToHero.containsKey(socketChannel)) {
+            return ;
+        }
+
         playersSymbolsToAvailable.put(playersSocketChannelToHero.get(socketChannel).getSymbolToVisualizeOnMap() - '0', true);
         playersSocketChannelToHero.remove(socketChannel);
     }

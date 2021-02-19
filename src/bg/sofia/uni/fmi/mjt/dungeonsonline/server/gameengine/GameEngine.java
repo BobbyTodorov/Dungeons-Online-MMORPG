@@ -20,6 +20,7 @@ public class GameEngine {
 
     private static final String INITIATE_BATTLE_STRING = "BATTLE %s VS %s" + System.lineSeparator();
     private static final String YOU_WON_MESSAGE = "You just won the battle!";
+    private static final String YOU_LOST_MESSAGE = "You just lost the battle!";
 
     private static final String TRADE_MESSAGE = "Traded %s with %s.";
     private static final String HERO_MOVED_MESSAGE = "Hero moved successfully.";
@@ -114,14 +115,14 @@ public class GameEngine {
 
         while(true){
             enemy.takeDamage(initiator.attack());
-            String resultAfterHit = performKillIfEnemyIsNotAlive(initiator, enemy);
+            String resultAfterHit = performKillIfAnyHeroIsDead(initiator, enemy);
             if (resultAfterHit != null) {
                 battleResult.append(resultAfterHit);
                 break;
             }
 
             initiator.takeDamage(enemy.attack());
-            String resultAfterBeingHit = performKillIfEnemyIsNotAlive(enemy, initiator);
+            String resultAfterBeingHit = performKillIfAnyHeroIsDead(initiator, enemy);
             if (resultAfterBeingHit != null) {
                 battleResult.append(resultAfterBeingHit);
                 break;
@@ -143,7 +144,8 @@ public class GameEngine {
     public String heroTryConsumingTreasure(Hero hero, Treasure treasure) {
         String consumeResult = treasure.consume(hero);
 
-        if (consumeResult.equals(BaseSkill.CANT_EQUIP_MESSAGE)) {
+        if (consumeResult.contains(String.format(BaseSkill.CANT_EQUIP_MESSAGE, "Weapon"))
+            || consumeResult.contains(String.format(BaseSkill.CANT_EQUIP_MESSAGE, "Spell"))) {
             return consumeResult + System.lineSeparator() + collectTreasureToHeroBackpack(treasure, hero);
         }
 
@@ -195,20 +197,29 @@ public class GameEngine {
         }
     }
 
-    private String performKillIfEnemyIsNotAlive(Hero hero1, Hero hero2) {
-        if(!hero2.isAlive()) {
-            hero1.gainExperience(EXPERIENCE_PER_KILLING_HERO);
+    private String performKillIfAnyHeroIsDead(Hero hero1, Hero hero2) {
+        if (!hero1.isAlive()) {
+            heroKillsAnotherHero(hero2, hero1);
 
-            if (hero2.backpack().size() == 0) {
-                map.changeGivenFieldByCoordinatesSymbol(hero2.positionOnMap().coordinate(), Map.FREE_FIELD_SYMBOL);
-            } else {
-                dropTreasureFromHero(hero2, hero2.backpack().remove(0));
-            }
+            return YOU_LOST_MESSAGE;
+
+        } else if(!hero2.isAlive()) {
+            heroKillsAnotherHero(hero1, hero2);
 
             return YOU_WON_MESSAGE;
         }
 
         return null;
+    }
+
+    private void heroKillsAnotherHero(Hero killer, Hero deadMan) {
+        killer.gainExperience(EXPERIENCE_PER_KILLING_HERO);
+
+        if (deadMan.backpack().size() == 0) {
+            map.changeGivenFieldByCoordinatesSymbol(deadMan.positionOnMap().coordinate(), Map.FREE_FIELD_SYMBOL);
+        } else {
+            dropTreasureFromHero(deadMan, deadMan.backpack().remove(0));
+        }
     }
 
     private char getHeroSymbol(Hero hero) { return hero.getSymbolToVisualizeOnMap(); }

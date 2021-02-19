@@ -101,14 +101,16 @@ public class NetworkServer {
         buffer.get(clientInputBytes);
         String readString = new String(clientInputBytes, StandardCharsets.UTF_8);
 
-        String logString = "Message [" + readString.trim() + "] received from clientChannel " + clientChannel.getRemoteAddress();
+        String logString =
+            "Message [" + readString.trim() + "] received from clientChannel " + clientChannel.getRemoteAddress();
         System.out.println(logString);
         logger.log(logString);
 
         return readString.trim();
     }
 
-    public synchronized void writeToClient(String msg, SocketChannel clientSocketChannel) throws IOException {
+    public synchronized void writeToClient(String msg, SocketChannel clientSocketChannel)
+        throws IOException {
         buffer.clear();
         buffer.put(msg.getBytes());
         buffer.flip();

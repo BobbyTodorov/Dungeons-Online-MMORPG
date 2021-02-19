@@ -121,9 +121,10 @@ public class GameEngineTest {
         String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1000/1000, mana=1000/1000, attackPoints=1000, " +
             "defensePoints=1000}, weapon=null, spell=null, experience=0} VS Hero 0 {name=, level=1, stats=health=1/1, " +
             "mana=1/1, attackPoints=1, defensePoints=1}, weapon=null, spell=null, experience=0}" +
-            System.lineSeparator() + System.lineSeparator() + " HAS WON!You just died.";
+            System.lineSeparator() + "You just won the battle!";
 
-        assertEquals("battleWithPlayer with weaker enemy should return winning first player string", expected, actual);
+        assertEquals("battleWithPlayer with weaker enemy should return battle string followed by winning " +
+            "first player string", expected, actual);
     }
 
     @Test
@@ -132,12 +133,13 @@ public class GameEngineTest {
         Hero testStrongerEnemy = new Hero("", new Stats(1000, 1000, 1000 ,1000));
 
         String actual = testGameEngine.battleWithAnotherHero(testWeakerInitiator, testStrongerEnemy);
-        String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1/1, mana=1/1, attackPoints=1, defensePoints=1}, " +
-            "weapon=null, spell=null, experience=0} VS Hero 0 {name=, level=1, stats=health=1000/1000, mana=1000/1000, " +
-            "attackPoints=1000, defensePoints=1000}, weapon=null, spell=null, experience=0}" +
-            System.lineSeparator() + System.lineSeparator() + " HAS WON!";
+        String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1/1, mana=1/1, attackPoints=1, " +
+            "defensePoints=1}, weapon=null, spell=null, experience=0} VS Hero 0 {name=, level=1, " +
+            "stats=health=1000/1000, mana=1000/1000, attackPoints=1000, defensePoints=1000}, " +
+            "weapon=null, spell=null, experience=0}" + System.lineSeparator() + "You just lost the battle!";
 
-        assertEquals("battleWithPlayer with weaker enemy should return winning first player string", expected, actual);
+        assertEquals("battleWithPlayer with stronger enemy should return battle string only",
+            expected, actual);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -164,6 +166,6 @@ public class GameEngineTest {
         String actual = testGameEngine.tradeTreasureWithAnotherHero(testInitiator, otherHero, 0);
 
         assertEquals("tradeWithPlayer should remove treasure from initiator's backpack and add it to otherHero's",
-            "Traded Spell{name=', damage=1, level=1 MANA_COST=1} with .", actual);
+            "Traded Spell{name=', damage=1, level=1, MANA_COST=1} with .", actual);
     }
 }

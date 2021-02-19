@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,6 +32,11 @@ public class PlayersConnectionStorageTest {
         testSocketChannel = SocketChannel.open();
     }
 
+    @Before
+    public void connectTestSocketChannel() throws MaxNumberOfPlayersReachedException {
+        testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
+    }
+
     @After
     public void disconnectTestSocketChannel() {
         testPlayersConnectionStorage.disconnectPlayerClient(testSocketChannel);
@@ -53,9 +59,11 @@ public class PlayersConnectionStorageTest {
         try {
             for (int i = 0; i <= MAX_NUMBER_OF_PLAYERS + 1; ++i) {
                 SocketChannel socketChannel = SocketChannel.open();
-                connectedSocketChannels.add(socketChannel);
 
-                testPlayersConnectionStorage.connectPlayer(socketChannel, testHero);
+                testPlayersConnectionStorage.connectPlayer(socketChannel,
+                    new Hero(testHero.getName(), testHero.getStats()));
+
+                connectedSocketChannels.add(socketChannel);
             }
         } finally {
             for (SocketChannel connectedSocketChannel : connectedSocketChannels) {
@@ -108,8 +116,8 @@ public class PlayersConnectionStorageTest {
     }
 
     @Test
-    public void testIsPlayerConnectedSuccess() throws MaxNumberOfPlayersReachedException {
-        assertFalse(testPlayersConnectionStorage.isPlayerClientConnected(testSocketChannel));
+    public void testIsPlayerConnectedSuccess() throws MaxNumberOfPlayersReachedException, IOException {
+        assertFalse(testPlayersConnectionStorage.isPlayerClientConnected(SocketChannel.open()));
 
         testPlayersConnectionStorage.connectPlayer(testSocketChannel, testHero);
 
@@ -119,6 +127,8 @@ public class PlayersConnectionStorageTest {
     @Test
     public void testRemovePlayersWithInterruptedConnectionSuccess()
         throws IOException, MaxNumberOfPlayersReachedException {
+        testPlayersConnectionStorage.disconnectPlayerClient(testSocketChannel); //from @Before
+
         SocketChannel toRemainOpenSocketChannel = SocketChannel.open();
         SocketChannel toBeClosedSocketChannel = SocketChannel.open();
 
