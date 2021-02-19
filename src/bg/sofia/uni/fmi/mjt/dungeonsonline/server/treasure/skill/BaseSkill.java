@@ -1,6 +1,5 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill;
 
-
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public abstract class BaseSkill implements Skill {
@@ -9,9 +8,9 @@ public abstract class BaseSkill implements Skill {
     protected int damage;
     protected int level;
 
-    public final static String CANT_EQUIP_MESSAGE = "%s level is too high for you.";
+    public final static String CANT_EQUIP_MESSAGE = "%s level is too high for you to use.";
 
-    public BaseSkill(String name, int damage, int level){
+    public BaseSkill(String name, int damage, int level) {
         ArgumentValidator.checkForNullArguments(name);
         ArgumentValidator.checkForPositiveArguments(damage, level);
 

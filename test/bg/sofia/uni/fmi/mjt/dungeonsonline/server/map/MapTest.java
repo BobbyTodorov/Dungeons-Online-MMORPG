@@ -33,7 +33,7 @@ public class MapTest {
     public void testChangeRandomFieldWithGivenSymbolToAnotherSuccess() {
         map.changeRandomFieldWithGivenSymbolToAnother('.', '1');
 
-        String actual = map.getMap().replaceAll("\\.|\n|\r\n", "");
+        String actual = map.matrix().replaceAll("\\.|\n|\r\n|#", "");
 
         assertEquals("changeRandomFieldWishGivenSymbolToAnother does not work as expected", "1", actual);
     }
@@ -45,7 +45,7 @@ public class MapTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testChangeGivenFieldByCoordinatesSymbolWithInvalidNewFieldSymbolArgument() {
-        map.changeGivenFieldByCoordinatesSymbol(new Coordinate(0,0), '@');
+        map.changeGivenFieldByCoordinatesSymbol(new Coordinate(0, 0), '@');
     }
 
     @Test(expected = OutOfMapBoundsException.class)
@@ -55,9 +55,9 @@ public class MapTest {
 
     @Test
     public void testChangeGivenFieldByCoordinatesSymbolSuccess() {
-        map.changeGivenFieldByCoordinatesSymbol(new Coordinate(3,0), '1');
+        map.changeGivenFieldByCoordinatesSymbol(new Coordinate(3, 0), '1');
 
-        assertEquals("changeGivenFieldByCoordinates does not work as expected", '1', map.getMap().charAt(3));
+        assertEquals("changeGivenFieldByCoordinates does not work as expected", '1', map.matrix().charAt(3));
     }
 
     @Test(expected = IllegalArgumentException.class)

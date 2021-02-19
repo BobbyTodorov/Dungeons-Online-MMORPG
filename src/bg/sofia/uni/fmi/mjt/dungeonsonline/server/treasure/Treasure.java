@@ -11,7 +11,7 @@ public interface Treasure extends Visualizable {
      * @param hero - the hero to consume the treasure
      * @return status message
      */
-    String consume(Hero hero);
+    String use(Hero hero);
 
     default char getSymbolToVisualizeOnMap() {
         return SYMBOL_TO_VISUALIZE_ON_MAP;

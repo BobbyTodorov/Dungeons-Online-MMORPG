@@ -5,6 +5,8 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
 public final class HealthPotion extends BasePotion {
 
+    private final static String CONSUMED_MESSAGE = "%s health points added to your hero!";
+
     private final static int REGULAR_AMOUNT_TO_HEAL = 50;
     private final static int GREATER_AMOUNT_TO_HEAL = 100;
     private final static int SUPERIOR_AMOUNT_TO_HEAL = 200;
@@ -18,18 +20,26 @@ public final class HealthPotion extends BasePotion {
         ArgumentValidator.checkForNullArguments(potionSize);
 
         switch (potionSize) {
-            case REGULAR -> { return new HealthPotion(REGULAR_AMOUNT_TO_HEAL); }
-            case GREATER -> { return new HealthPotion(GREATER_AMOUNT_TO_HEAL); }
-            case SUPERIOR -> { return new HealthPotion(SUPERIOR_AMOUNT_TO_HEAL); }
-            default -> { return null; }
+            case REGULAR -> {
+                return new HealthPotion(REGULAR_AMOUNT_TO_HEAL);
+            }
+            case GREATER -> {
+                return new HealthPotion(GREATER_AMOUNT_TO_HEAL);
+            }
+            case SUPERIOR -> {
+                return new HealthPotion(SUPERIOR_AMOUNT_TO_HEAL);
+            }
+            default -> {
+                return null;
+            }
         }
     }
 
-    public String consume(Hero hero) {
+    public String use(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
-        hero.takeHealing(this.heal());
-        return this.heal() + " health points added to your hero!";
+        hero.takeHealing(heal());
+        return String.format(CONSUMED_MESSAGE, heal());
     }
 
     @Override

@@ -43,7 +43,7 @@ public class SpellTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testSpell.consume(null);
+        testSpell.use(null);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class SpellTest {
         when(testHero.getLevel()).thenReturn(1);
 
         assertEquals("collect with lower hero level must not call learn to spell",
-            "Spell level is too high for you to equip.", testSpell.consume(testHero));
+            "Spell level is too high for you to use.", testSpell.use(testHero));
 
         verify(testHero, times(0)).learn(testSpell);
     }
@@ -61,7 +61,7 @@ public class SpellTest {
         when(testHero.getLevel()).thenReturn(3);
 
         assertEquals("collect with higher hero level must call learn to spell",
-            "Learned Spell  Level: 2 Damage points: 2, Mana cost: 1", testSpell.consume(testHero));
+            "Learned Spell  Level: 2 Damage points: 2, Mana cost: 1", testSpell.use(testHero));
 
         verify(testHero).learn(testSpell);
     }

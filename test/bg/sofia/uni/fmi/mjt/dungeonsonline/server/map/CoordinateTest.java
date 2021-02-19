@@ -34,7 +34,7 @@ public class CoordinateTest {
         int minY = 1;
         int maxY = 3;
 
-        for (int i = 0; i < 50; ++ i) {
+        for (int i = 0; i < 50; ++i) {
             Coordinate coordinate = Coordinate.createRandomCoordinate(minX, maxX, minY, maxY);
             assertTrue("CreateRandomCoordinate returned coordinate out of given bounds",
                 coordinate.x() >= minX && coordinate.x() <= maxX

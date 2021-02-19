@@ -49,7 +49,10 @@ public class Map {
         return instance;
     }
 
-    public String getMap() {
+    /**
+     * @return string, containing the map's matrix, that is ready to be visualized
+     */
+    public String matrix() {
         StringBuilder matrixAsString = new StringBuilder();
         for (int i = 0; i < MAP_HEIGHT; ++i) {
             for (int j = 0; j < MAP_WIDTH; ++j) {
@@ -100,8 +103,8 @@ public class Map {
         try {
             fieldSymbol = matrix[coordinate.x()][coordinate.y()];
         } catch (ArrayIndexOutOfBoundsException e) {
-        throw new OutOfMapBoundsException(String.format(OUT_OF_BOUNDS_EXCEPTION_MESSAGE, MAP_HEIGHT, MAP_WIDTH));
-    }
+            throw new OutOfMapBoundsException(String.format(OUT_OF_BOUNDS_EXCEPTION_MESSAGE, MAP_HEIGHT, MAP_WIDTH));
+        }
 
         return fieldSymbol;
     }
@@ -121,13 +124,14 @@ public class Map {
         ArgumentValidator.checkForNullArguments(visualizableObjects);
 
         for (Object object : visualizableObjects) {
-            changeRandomFieldWithGivenSymbolToAnother(UNINITIALIZED_FIELD_SYMBOL, ((Visualizable) object).getSymbolToVisualizeOnMap());
+            changeRandomFieldWithGivenSymbolToAnother(UNINITIALIZED_FIELD_SYMBOL,
+                ((Visualizable) object).getSymbolToVisualizeOnMap());
         }
     }
 
     private void setUninitializedFieldsToFree() {
         for (int i = 0; i < MAP_WIDTH; ++i) {
-            for (int j = 0; j < MAP_HEIGHT ; ++j) {
+            for (int j = 0; j < MAP_HEIGHT; ++j) {
                 if (matrix[i][j] == UNINITIALIZED_FIELD_SYMBOL) {
                     matrix[i][j] = FREE_FIELD_SYMBOL;
                 }
@@ -152,14 +156,15 @@ public class Map {
                 } else {
                     createVerticalWall(wallLength, randHorizontalStartPos, randVerticalStartPos);
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
             wallsCounter--;
         }
     }
 
     private void createHorizontalWall(int wallLength, int horizontalStartPos, int verticalStartPos) {
-        int modifiedHorizontalWallLength = wallLength*((MAP_WIDTH - MAP_HEIGHT)/10);
+        int modifiedHorizontalWallLength = wallLength * ((MAP_WIDTH - MAP_HEIGHT) / 10);
         for (int i = 0; i < modifiedHorizontalWallLength; ++i) {
             if (matrix[horizontalStartPos + i][verticalStartPos] == UNINITIALIZED_FIELD_SYMBOL) {
                 matrix[horizontalStartPos + i][verticalStartPos] = OBSTACLE_FIELD_SYMBOL;

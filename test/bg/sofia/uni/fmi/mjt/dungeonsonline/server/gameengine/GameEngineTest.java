@@ -2,21 +2,15 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.gameengine;
 
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.PlayerCommand;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Backpack;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Direction;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Position;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.map.Map;
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill.Spell;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GameEngineTest {
@@ -26,21 +20,6 @@ public class GameEngineTest {
     private final static Hero testHero = new Hero("", testStats);
     private final static Spell testTreasure = new Spell("", 1, 1, 1);
 
-    private final static StaticObjectsStorage testStaticObjectsStorage = StaticObjectsStorage.getInstance();
-
-    @Mock
-    Map testMap;
-
-    @Mock
-    Backpack testBackpack;
-
-    @Mock
-    Hero heroMock;
-
-    @Mock
-    Position positionMock;
-
-    //@InjectMocks
     GameEngine testGameEngine = GameEngine.getInstance();
 
     @Test(expected = IllegalArgumentException.class)
@@ -52,18 +31,6 @@ public class GameEngineTest {
     public void testMoveHeroWithNullDirectionArgument() {
         testGameEngine.moveHero(testHero, null);
     }
-
-//    TODO
-//    @Test
-//    public void testMoveHeroToPositionWithObstacle() {
-//        testHero.setSymbolToVisualize(1);
-//        testHero.setPositionOnMap(new Coordinate(1, 1));
-//
-//        when(testMap.getFieldSymbol(new Coordinate(0, 1))).thenReturn('#');
-//
-//        assertEquals("moveHero to position with obstacle must return correct message",
-//            "Obstacle there. Hero was not moved.", testGameEngine.moveHero(testHero, Direction.LEFT));
-//    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testExecuteCommandOnHeroTreasureWithNullCommand() {
@@ -115,7 +82,7 @@ public class GameEngineTest {
     @Test
     public void testBattleWithPlayerWithWeakerEnemy() {
         Hero testStrongerInitiator = new Hero("", new Stats(1000, 1000, 1000, 1000));
-        Hero testWeakerEnemy = new Hero("", new Stats(1, 1, 1 ,1));
+        Hero testWeakerEnemy = new Hero("", new Stats(1, 1, 1, 1));
 
         String actual = testGameEngine.battleWithAnotherHero(testStrongerInitiator, testWeakerEnemy);
         String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1000/1000, mana=1000/1000, attackPoints=1000, " +
@@ -130,7 +97,7 @@ public class GameEngineTest {
     @Test
     public void testBattleWithPlayerWithStrongerEnemy() {
         Hero testWeakerInitiator = new Hero("", new Stats(1, 1, 1, 1));
-        Hero testStrongerEnemy = new Hero("", new Stats(1000, 1000, 1000 ,1000));
+        Hero testStrongerEnemy = new Hero("", new Stats(1000, 1000, 1000, 1000));
 
         String actual = testGameEngine.battleWithAnotherHero(testWeakerInitiator, testStrongerEnemy);
         String expected = "BATTLE Hero 0 {name=, level=1, stats=health=1/1, mana=1/1, attackPoints=1, " +
@@ -166,6 +133,6 @@ public class GameEngineTest {
         String actual = testGameEngine.tradeTreasureWithAnotherHero(testInitiator, otherHero, 0);
 
         assertEquals("tradeWithPlayer should remove treasure from initiator's backpack and add it to otherHero's",
-            "Traded Spell{name=', damage=1, level=1, MANA_COST=1} with .", actual);
+            "Traded Spell{name='', damage=1, level=1, MANA_COST=1} with .", actual);
     }
 }

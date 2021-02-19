@@ -63,7 +63,7 @@ public class HeroTest {
 
     @Test
     public void testTakeHealingSuccess() {
-        Stats testStats = new Stats(10, 1, 1 ,1);
+        Stats testStats = new Stats(10, 1, 1, 1);
         testStats.decreaseCurrentHealth(5);
         Hero testHero = new Hero("", testStats);
 
@@ -80,10 +80,10 @@ public class HeroTest {
 
     @Test
     public void testTakeManaSuccess() {
-        Stats testStats = new Stats(1, 10, 1 ,1);
+        Stats testStats = new Stats(1, 10, 1, 1);
         testStats.decreaseCurrentMana(5);
 
-        Hero testHero = new Hero("",testStats);
+        Hero testHero = new Hero("", testStats);
         testHero.takeMana(1);
 
         assertEquals("takeMana should increase hero's mana correctly",
@@ -111,7 +111,7 @@ public class HeroTest {
         testHero.equip(testWeapon);
 
         assertEquals("equip must equip weapon which level is lower or equal to hero's level " +
-                "when hero has no equipped weapon", testWeapon, testHero.getWeapon());
+            "when hero has no equipped weapon", testWeapon, testHero.getWeapon());
     }
 
     @Test
@@ -120,7 +120,7 @@ public class HeroTest {
 
         Hero testHero = new Hero("", testStats);
         testHero.equip(testWeapon);
-        testHero.equip(new Weapon("", 1 ,1));
+        testHero.equip(new Weapon("", 1, 1));
 
         assertEquals("equip must not equip weapon which level is lower or equal to hero's level " +
             "when hero has equipped weapon with higher damage", testWeapon, testHero.getWeapon());
@@ -131,7 +131,7 @@ public class HeroTest {
         Weapon testWeapon = new Weapon("", 2, 1);
 
         Hero testHero = new Hero("", testStats);
-        testHero.equip(new Weapon("", 1 ,1));
+        testHero.equip(new Weapon("", 1, 1));
         testHero.equip(testWeapon);
 
         assertEquals("equip must equip weapon which level is lower or equal to hero's level " +
@@ -168,7 +168,7 @@ public class HeroTest {
 
         Hero testHero = new Hero("", testStats);
         testHero.learn(testSpell);
-        testHero.learn(new Spell("", 1 ,1, 1));
+        testHero.learn(new Spell("", 1, 1, 1));
 
         assertEquals("learn must not learn spell which level is lower or equal to hero's level " +
             "when hero has learnt spell with higher damage", testSpell, testHero.getSpell());
@@ -179,7 +179,7 @@ public class HeroTest {
         Spell testSpell = new Spell("", 2, 1, 1);
 
         Hero testHero = new Hero("", testStats);
-        testHero.learn(new Spell("", 1 ,1, 1));
+        testHero.learn(new Spell("", 1, 1, 1));
         testHero.learn(testSpell);
 
         assertEquals("learn must learn spell which level is lower or equal to hero's level " +

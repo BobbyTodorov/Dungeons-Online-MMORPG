@@ -36,7 +36,8 @@ public class GameEngine {
 
     private static GameEngine instance;
 
-    private GameEngine() {}
+    private GameEngine() {
+    }
 
     public static GameEngine getInstance() {
         if (instance == null) {
@@ -46,17 +47,32 @@ public class GameEngine {
         return instance;
     }
 
-    public String getMapToVisualize() {
-        return map.getMap();
+    /**
+     * @return the game map
+     */
+    public String map() {
+        return map.matrix();
     }
 
+    /**
+     * Changes random free map field with given hero's symbolToVisualize. Then sets the given hero's position
+     * to the position of the changed field.
+     *
+     * @param hero the hero to be summoned
+     */
     public void summonPlayerHero(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
-        Coordinate summonedHeroPosition = map.changeRandomFieldWithGivenSymbolToAnother(Map.FREE_FIELD_SYMBOL, getHeroSymbol(hero));
+        Coordinate summonedHeroPosition =
+            map.changeRandomFieldWithGivenSymbolToAnother(Map.FREE_FIELD_SYMBOL, getHeroSymbol(hero));
         hero.setPositionOnMap(summonedHeroPosition);
     }
 
+    /**
+     * If the field located on given hero's coordinate is its symbolToVisualize, replace it with a free field symbol.
+     *
+     * @param hero the hero to be unsummoned
+     */
     public void unSummonPlayerHero(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
@@ -67,6 +83,18 @@ public class GameEngine {
         }
     }
 
+    /**
+     * Checks the field that given hero will be moved to.
+     * If the field is free, returns status and moves the hero there.
+     * If there is a player on the field, returns status followed by that hero's symbolToVisualize. The hero then
+     * is NOT moved in order to prevent heroes overlapping.
+     * If there is a treasure, returns status and moves the hero there.
+     * If there is a minion, initiates a battle with that minion. If hero kills the minion, the hero is moved there.
+     *
+     * @param hero      the hero to be moved
+     * @param direction the direction to be moved in
+     * @return result status after moving
+     */
     public String moveHero(Hero hero, Direction direction) {
         ArgumentValidator.checkForNullArguments(hero, direction);
 
@@ -81,8 +109,12 @@ public class GameEngine {
         }
 
         switch (newPositionFieldSymbol) {
-            case Map.FREE_FIELD_SYMBOL -> { return moveHeroToPosition(hero, currentHeroPosition, newHeroPosition); }
-            case Map.OBSTACLE_FIELD_SYMBOL -> { return STEP_ON_OBSTACLE_MESSAGE; }
+            case Map.FREE_FIELD_SYMBOL -> {
+                return moveHeroToPosition(hero, currentHeroPosition, newHeroPosition);
+            }
+            case Map.OBSTACLE_FIELD_SYMBOL -> {
+                return STEP_ON_OBSTACLE_MESSAGE;
+            }
             case '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
                 return STEP_ON_HERO_STATUS + newPositionFieldSymbol;
             }
@@ -93,27 +125,47 @@ public class GameEngine {
             case Minion.SYMBOL_TO_VISUALIZE_ON_MAP -> {
                 return moveHeroToMinionField(hero, currentHeroPosition, newHeroPosition);
             }
-            default -> { return INVALID_DIRECTION_MESSAGE; }
+            default -> {
+                return INVALID_DIRECTION_MESSAGE;
+            }
         }
     }
 
+    /**
+     * @param command  the command to execute
+     * @param hero     the hero that executes it
+     * @param treasure the treasure to be executed on
+     * @return status after dropping or status after consuming
+     */
     public String executeCommandOnHeroTreasure(PlayerCommand command, Hero hero, Treasure treasure) {
         ArgumentValidator.checkForNullArguments(command, hero, treasure);
 
         switch (command) {
-            case DROP -> { dropTreasureFromHero(hero, treasure); }
-            case USE -> { return treasure.consume(hero); }
+            case DROP -> {
+                dropTreasureFromHero(hero, treasure);
+            }
+            case USE -> {
+                return treasure.use(hero);
+            }
         }
 
         return null;
     }
 
+    /**
+     * A battle is an alternation of attacks between the initiator and the enemy.
+     * The initiator goes first. The attacks continue until one of the heroes is dead.
+     *
+     * @param initiator the hero to initiate the battle
+     * @param enemy     the enemy
+     * @return information about the battlers followed by win/lose status according to the initiator
+     */
     public String battleWithAnotherHero(Hero initiator, Hero enemy) {
         ArgumentValidator.checkForNullArguments(initiator, enemy);
 
         StringBuilder battleResult = new StringBuilder(String.format(INITIATE_BATTLE_STRING, initiator, enemy));
 
-        while(true){
+        while (true) {
             enemy.takeDamage(initiator.attack());
             String resultAfterHit = performKillIfAnyHeroIsDead(initiator, enemy);
             if (resultAfterHit != null) {
@@ -131,6 +183,14 @@ public class GameEngine {
         return battleResult.toString();
     }
 
+    /**
+     * Removes the treasure (by its index) from initiator's backpack and adds it to otherHero's backpack.
+     *
+     * @param initiator     the hero that will give a treasure
+     * @param otherHero     the hero that will receive the treasure
+     * @param treasureIndex the index of the treasure (from initiator's backpack) to be traded
+     * @return trade status message
+     */
     public String tradeTreasureWithAnotherHero(Hero initiator, Hero otherHero, int treasureIndex) {
         ArgumentValidator.checkForNullArguments(initiator, otherHero);
         ArgumentValidator.checkForNonNegativeArguments(treasureIndex);
@@ -141,8 +201,15 @@ public class GameEngine {
         return String.format(TRADE_MESSAGE, treasureToTrade.toString(), otherHero.getName());
     }
 
+    /**
+     * Given hero consumes given treasure if possible.
+     *
+     * @param hero     the hero to consume the treasure
+     * @param treasure the treasure to be consumed by hero
+     * @return consume status result
+     */
     public String heroTryConsumingTreasure(Hero hero, Treasure treasure) {
-        String consumeResult = treasure.consume(hero);
+        String consumeResult = treasure.use(hero);
 
         if (consumeResult.contains(String.format(BaseSkill.CANT_EQUIP_MESSAGE, "Weapon"))
             || consumeResult.contains(String.format(BaseSkill.CANT_EQUIP_MESSAGE, "Spell"))) {
@@ -152,6 +219,11 @@ public class GameEngine {
         return consumeResult;
     }
 
+    /**
+     * Collects given treasure to given hero's backpack.
+     *
+     * @return collect status
+     */
     public String collectTreasureToHeroBackpack(Treasure treasure, Hero hero) {
         hero.collectTreasure(treasure);
 
@@ -184,14 +256,14 @@ public class GameEngine {
     private boolean battleWithMinion(Hero initiator, Minion enemy) {
         while (true) {
             enemy.takeDamage(initiator.attack());
-            if(!enemy.isAlive()) {
+            if (!enemy.isAlive()) {
                 initiator.gainExperience(enemy.giveExperience());
                 map.changeRandomFieldWithGivenSymbolToAnother(Map.FREE_FIELD_SYMBOL, Minion.SYMBOL_TO_VISUALIZE_ON_MAP);
                 return true;
             }
 
             initiator.takeDamage(enemy.attack());
-            if(!initiator.isAlive()) {
+            if (!initiator.isAlive()) {
                 return false;
             }
         }
@@ -203,7 +275,7 @@ public class GameEngine {
 
             return YOU_LOST_MESSAGE;
 
-        } else if(!hero2.isAlive()) {
+        } else if (!hero2.isAlive()) {
             heroKillsAnotherHero(hero1, hero2);
 
             return YOU_WON_MESSAGE;
@@ -222,7 +294,9 @@ public class GameEngine {
         }
     }
 
-    private char getHeroSymbol(Hero hero) { return hero.getSymbolToVisualizeOnMap(); }
+    private char getHeroSymbol(Hero hero) {
+        return hero.getSymbolToVisualizeOnMap();
+    }
 
     private void dropTreasureFromHero(Hero hero, Treasure treasure) {
         staticObjectsStorage.addTreasure(treasure);

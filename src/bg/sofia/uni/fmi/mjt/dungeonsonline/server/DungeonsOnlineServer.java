@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 
 public class DungeonsOnlineServer {
-    //TODO remove souts
     private static final int MAX_NUMBER_OF_PLAYERS_CONNECTED = 9;
 
     private static final int PLAYER_STARTING_HEALTH = 100;
@@ -54,7 +53,7 @@ public class DungeonsOnlineServer {
     private boolean isRunning;
 
     public static void main(String[] args) {
-        DungeonsOnlineServer test =  new DungeonsOnlineServer();
+        DungeonsOnlineServer test = new DungeonsOnlineServer();
         test.start();
     }
 
@@ -68,11 +67,10 @@ public class DungeonsOnlineServer {
     public void stop() {
         isRunning = false;
         networkServer.stop();
-        //TODO save status with json
     }
 
     private void run() {
-        while(isRunning) {
+        while (isRunning) {
             ClientRequest playerRequest = networkServer.pollNextClientRequest();
 
             if (playerRequest == null) {
@@ -196,7 +194,7 @@ public class DungeonsOnlineServer {
         do {
             commandToTreasureString = receiveMessageFromSocketChannel(playerClient);
         } while (!(commandToTreasureString.equals(PlayerCommand.DROP.toString())
-                || commandToTreasureString.equals(PlayerCommand.USE.toString())));
+            || commandToTreasureString.equals(PlayerCommand.USE.toString())));
 
         sendMessageToSocketChannel("", MessageType.DIALOG_END, playerClient);
         PlayerCommand commandToTreasure = PlayerCommand.fromString(commandToTreasureString);
@@ -233,7 +231,7 @@ public class DungeonsOnlineServer {
         do {
             commandToTreasure = receiveMessageFromSocketChannel(playerClient);
         } while (!(commandToTreasure.equals(PlayerCommand.CONSUME.toString())
-                || commandToTreasure.equals(PlayerCommand.COLLECT.toString())));
+            || commandToTreasure.equals(PlayerCommand.COLLECT.toString())));
 
         Hero playerHero = playersConnectionStorage.getPlayerHeroOfGivenPlayerClient(playerClient);
 
@@ -254,7 +252,7 @@ public class DungeonsOnlineServer {
         do {
             commandToInteractString = receiveMessageFromSocketChannel(playerClient);
         } while (!(commandToInteractString.equals(PlayerCommand.ATTACK.toString())
-                || commandToInteractString.equals(PlayerCommand.TRADE.toString())));
+            || commandToInteractString.equals(PlayerCommand.TRADE.toString())));
 
         sendMessageToSocketChannel("", MessageType.DIALOG_END, playerClient);
         if (commandToInteractString.equals(PlayerCommand.ATTACK.toString())) {
@@ -310,7 +308,7 @@ public class DungeonsOnlineServer {
     }
 
     private void displayMapToPlayerClient(SocketChannel playerClient) throws IOException {
-        sendMessageToSocketChannel(gameEngine.getMapToVisualize(), MessageType.MAP, playerClient);
+        sendMessageToSocketChannel(gameEngine.map(), MessageType.MAP, playerClient);
     }
 
     private void displayHeroInfoToPlayerClient(SocketChannel playerClient, Hero hero) throws IOException {

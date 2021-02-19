@@ -6,7 +6,8 @@ public final class ArgumentValidator {
     private final static String MUST_BE_NON_NEGATIVE_MESSAGE = "Given argument(s) must be non-negative.";
     private final static String MUST_BE_NOT_NULL_MESSAGE = "Given argument(s) must be not null.";
 
-    private ArgumentValidator() {}
+    private ArgumentValidator() {
+    }
 
     public static void checkForNonNegativeArguments(int... args) {
         for (int arg : args) {

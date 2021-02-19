@@ -33,10 +33,13 @@ public class Hero extends BaseActor implements IHero {
         this.level = START_LEVEL;
         this.weapon = START_WEAPON;
         this.spell = START_SPELL;
-        positionOnMap = new Position(new Coordinate(0,0));
+        positionOnMap = new Position(new Coordinate(0, 0));
         this.backpack = new Backpack();
     }
 
+    /**
+     * @param symbolToVisualize the symbol associated to this hero, to be visualized later on the map
+     */
     public void setSymbolToVisualize(int symbolToVisualize) {
         this.symbolToVisualize = symbolToVisualize;
     }
@@ -80,7 +83,7 @@ public class Hero extends BaseActor implements IHero {
             return;
         }
 
-        if (stats.getCurrentHealth() <= 0)  {
+        if (stats.getCurrentHealth() <= 0) {
             return;
         }
 
@@ -106,7 +109,7 @@ public class Hero extends BaseActor implements IHero {
             return false;
         }
 
-        if(getWeapon() == null || weapon.getDamage() > getWeapon().getDamage()) {
+        if (getWeapon() == null || weapon.getDamage() > getWeapon().getDamage()) {
             this.weapon = weapon;
             return true;
         }
@@ -121,7 +124,7 @@ public class Hero extends BaseActor implements IHero {
             return false;
         }
 
-        if(getSpell() == null || spell.getDamage() > getSpell().getDamage()) {
+        if (getSpell() == null || spell.getDamage() > getSpell().getDamage()) {
             this.spell = spell;
             return true;
         }
@@ -145,6 +148,9 @@ public class Hero extends BaseActor implements IHero {
         stats.increaseDefense(DEFENSE_INCREASE_PER_LEVEL);
     }
 
+    /**
+     * @return the symbol associated to this hero that is to be visualized on the map
+     */
     @Override
     public char getSymbolToVisualizeOnMap() {
         return (char) (symbolToVisualize + '0');
@@ -158,7 +164,6 @@ public class Hero extends BaseActor implements IHero {
             ", stats=" + stats +
             ", weapon=" + weapon +
             ", spell=" + spell +
-            //TODO ", backpack=" + backpack +
             ", experience=" + experience +
             '}';
     }

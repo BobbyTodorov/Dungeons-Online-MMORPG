@@ -24,7 +24,7 @@ public class WeaponTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testWeapon.consume(null);
+        testWeapon.use(null);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class WeaponTest {
         when(testHero.getLevel()).thenReturn(1);
 
         assertEquals("collect with lower hero level must not call equip to weapon",
-            "Weapon level is too high for you to equip.", testWeapon.consume(testHero));
+            "Weapon level is too high for you to use.", testWeapon.use(testHero));
 
         verify(testHero, times(0)).equip(testWeapon);
     }
@@ -42,7 +42,7 @@ public class WeaponTest {
         when(testHero.getLevel()).thenReturn(3);
 
         assertEquals("collect with higher hero level must call equip to weapon",
-            "Equipped Weapon  Level: 2 Damage points: 2", testWeapon.consume(testHero));
+            "Equipped Weapon  Level: 2 Damage points: 2", testWeapon.use(testHero));
 
         verify(testHero).equip(testWeapon);
     }

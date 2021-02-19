@@ -3,14 +3,16 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
-public final class Weapon extends BaseSkill{
+public final class Weapon extends BaseSkill {
+
+    private static final String EQUIP_MESSAGE = "Equipped Weapon %s Level: %d Damage points: %d";
 
     public Weapon(String name, int damage, int level) {
         super(name, damage, level);
     }
 
     @Override
-    public String consume(Hero hero) {
+    public String use(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {
@@ -18,7 +20,6 @@ public final class Weapon extends BaseSkill{
         }
 
         hero.equip(this);
-        return "Equipped Weapon " + this.name + " Level: " + this.level +
-            " Damage points: " + this.getDamage();
+        return String.format(EQUIP_MESSAGE, name, level, getDamage());
     }
 }

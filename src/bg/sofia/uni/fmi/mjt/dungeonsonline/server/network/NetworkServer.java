@@ -18,13 +18,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class NetworkServer {
 
     private static final String SERVER_RUNNING_INTERRUPTED_EXCEPTION_MESSAGE = "Server running was interrupted.";
     private static final String SERVER_CREATION_FAILED_EXCEPTION_MESSAGE = "Server creation failed.";
     private static final String SERVER_CLOSURE_FAIL_EXCEPTION_MESSAGE = "Server closing failed.";
+    private static final String SC_CONNECTION_ACCEPTED = "Connection accepted from client %s";
+    private static final String SC_CONNECTION_INTERRUPTED = "%s connection interrupted.";
 
     private static final int SERVER_PORT = 7777;
     private static final String SERVER_HOST = "localhost";
@@ -41,7 +42,8 @@ public class NetworkServer {
     private final static Logger logger = Logger.getInstance();
 
 
-    private NetworkServer() {}
+    private NetworkServer() {
+    }
 
     private static NetworkServer instance = null;
 
@@ -53,6 +55,9 @@ public class NetworkServer {
         return instance;
     }
 
+    /**
+     * @return next ClientRequest waiting to be processed
+     */
     public ClientRequest pollNextClientRequest() {
         return receivedClientRequests.poll();
     }
@@ -103,7 +108,6 @@ public class NetworkServer {
 
         String logString =
             "Message [" + readString.trim() + "] received from clientChannel " + clientChannel.getRemoteAddress();
-        System.out.println(logString);
         logger.log(logString);
 
         return readString.trim();
@@ -116,11 +120,17 @@ public class NetworkServer {
         buffer.flip();
 
         String logString = "Sending message to clientChannel: ";
-        System.out.println(logString);
         logger.log(logString);
-        logString = msg;
-        System.out.println(logString);
-        logger.log(logString);
+
+        logString = msg; // do not log statuses and empty strings
+        if (!(logString.equalsIgnoreCase(MessageType.MESSAGE.toString())
+            || logString.equalsIgnoreCase(MessageType.MAP.toString())
+            || logString.equalsIgnoreCase(MessageType.DIALOGING.toString())
+            || logString.equalsIgnoreCase(MessageType.DIALOG_END.toString()))
+            || logString.equals("")) {
+            logger.log(logString);
+        }
+
         clientSocketChannel.write(buffer);
     }
 
@@ -151,8 +161,7 @@ public class NetworkServer {
                 try {
                     clientInput = readFromClient(clientChannel);
                 } catch (SocketException e) {
-                    String logString = clientChannel.getRemoteAddress() + " connection interrupted in NetworkServer";
-                    System.out.println(logString);
+                    String logString = String.format(SC_CONNECTION_INTERRUPTED, clientChannel.getRemoteAddress());
                     logger.log(logString);
                     clientChannel.close();
                     continue;
@@ -180,7 +189,7 @@ public class NetworkServer {
         clientSocketChannel.configureBlocking(false);
         clientSocketChannel.register(selector, SelectionKey.OP_READ);
 
-        String logString = "Connection accepted from clientChannel " + clientSocketChannel.getRemoteAddress();
+        String logString = String.format(SC_CONNECTION_ACCEPTED, clientSocketChannel.getRemoteAddress());
         System.out.println(logString);
         logger.log(logString);
     }

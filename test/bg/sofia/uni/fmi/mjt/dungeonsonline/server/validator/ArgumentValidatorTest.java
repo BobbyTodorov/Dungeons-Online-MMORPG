@@ -26,7 +26,7 @@ public class ArgumentValidatorTest {
 
     @Test
     public void testCheckForPositiveArgumentsWithPositiveArgument() {
-        ArgumentValidator.checkForPositiveArguments(1,2,3);
+        ArgumentValidator.checkForPositiveArguments(1, 2, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)

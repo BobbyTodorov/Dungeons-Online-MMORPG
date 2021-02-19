@@ -22,33 +22,36 @@ public class StaticObjectsStorage {
     private static final int NUMBER_OF_MEDIUM_MINIONS = 3;
     private static final int NUMBER_OF_HARD_MINIONS = 2;
     private static final int TOTAL_NUMBER_OF_MINIONS;
+
     static {
         TOTAL_NUMBER_OF_MINIONS =
             NUMBER_OF_EASY_MINIONS
-            + NUMBER_OF_MEDIUM_MINIONS
-            + NUMBER_OF_HARD_MINIONS;
+                + NUMBER_OF_MEDIUM_MINIONS
+                + NUMBER_OF_HARD_MINIONS;
     }
 
     private static final int NUMBER_OF_REGULAR_HEALTH_POTIONS = 4;
     private static final int NUMBER_OF_GREATER_HEALTH_POTIONS = 3;
     private static final int NUMBER_OF_SUPERIOR_HEALTH_POTIONS = 2;
     private static final int TOTAL_NUMBER_OF_HEALTH_POTIONS;
+
     static {
         TOTAL_NUMBER_OF_HEALTH_POTIONS =
             NUMBER_OF_REGULAR_HEALTH_POTIONS
-            + NUMBER_OF_GREATER_HEALTH_POTIONS
-            + NUMBER_OF_SUPERIOR_HEALTH_POTIONS;
+                + NUMBER_OF_GREATER_HEALTH_POTIONS
+                + NUMBER_OF_SUPERIOR_HEALTH_POTIONS;
     }
 
     private static final int NUMBER_OF_REGULAR_MANA_POTIONS = 3;
     private static final int NUMBER_OF_GREATER_MANA_POTIONS = 2;
     private static final int NUMBER_OF_SUPERIOR_MANA_POTIONS = 2;
     private static final int TOTAL_NUMBER_OF_MANA_POTIONS;
+
     static {
         TOTAL_NUMBER_OF_MANA_POTIONS =
             NUMBER_OF_REGULAR_MANA_POTIONS
-            + NUMBER_OF_GREATER_MANA_POTIONS
-            + NUMBER_OF_SUPERIOR_MANA_POTIONS;
+                + NUMBER_OF_GREATER_MANA_POTIONS
+                + NUMBER_OF_SUPERIOR_MANA_POTIONS;
     }
 
     private static final int NUMBER_OF_WEAPONS = 10;
@@ -66,12 +69,13 @@ public class StaticObjectsStorage {
     private static final Spell poison = new Spell("Poison", 60, 4, 50);
 
     private static final int TOTAL_NUMBER_OF_TREASURES;
+
     static {
         TOTAL_NUMBER_OF_TREASURES =
             TOTAL_NUMBER_OF_HEALTH_POTIONS
-            + TOTAL_NUMBER_OF_MANA_POTIONS
-            + NUMBER_OF_WEAPONS
-            + NUMBER_OF_SPELLS;
+                + TOTAL_NUMBER_OF_MANA_POTIONS
+                + NUMBER_OF_WEAPONS
+                + NUMBER_OF_SPELLS;
     }
 
     private final List<Minion> minions;
@@ -112,7 +116,8 @@ public class StaticObjectsStorage {
     }
 
     public Treasure getTreasure() {
-        return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES)); }
+        return treasures.get((takenTreasures++ % TOTAL_NUMBER_OF_TREASURES));
+    }
 
     public Minion getMinion() {
         return minions.get((beatenMinions++ % TOTAL_NUMBER_OF_TREASURES));

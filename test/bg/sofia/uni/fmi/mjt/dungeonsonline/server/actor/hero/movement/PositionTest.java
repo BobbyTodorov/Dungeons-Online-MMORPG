@@ -9,7 +9,7 @@ public class PositionTest {
 
     @Test
     public void testCreatePositionToTheLeft() {
-        Position oldPosition = new Position(new Coordinate(1 ,1));
+        Position oldPosition = new Position(new Coordinate(1, 1));
 
         Position newPosition = Position.createPosition(oldPosition, Direction.LEFT);
 
@@ -19,7 +19,7 @@ public class PositionTest {
 
     @Test
     public void testCreatePositionToTheRight() {
-        Position oldPosition = new Position(new Coordinate(1 ,1));
+        Position oldPosition = new Position(new Coordinate(1, 1));
 
         Position newPosition = Position.createPosition(oldPosition, Direction.RIGHT);
 
@@ -29,7 +29,7 @@ public class PositionTest {
 
     @Test
     public void testCreatePositionToUp() {
-        Position oldPosition = new Position(new Coordinate(1 ,1));
+        Position oldPosition = new Position(new Coordinate(1, 1));
 
         Position newPosition = Position.createPosition(oldPosition, Direction.UP);
 
@@ -39,7 +39,7 @@ public class PositionTest {
 
     @Test
     public void testCreatePositionToDown() {
-        Position oldPosition = new Position(new Coordinate(1 ,1));
+        Position oldPosition = new Position(new Coordinate(1, 1));
 
         Position newPosition = Position.createPosition(oldPosition, Direction.DOWN);
 

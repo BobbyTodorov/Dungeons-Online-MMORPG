@@ -17,22 +17,22 @@ public final class StatsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructingWithNonPositiveHealthPoints() {
-        new Stats(0, 1, 1 ,1);
+        new Stats(0, 1, 1, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructingWithNegativeManaPoints() {
-        new Stats(1, -1, 1 ,1);
+        new Stats(1, -1, 1, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructingWithNegativeAttackPoints() {
-        new Stats(1, 1, -1 ,1);
+        new Stats(1, 1, -1, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConstructingWithNegativeDefensePoints() {
-        new Stats(1, 1, 1 ,-1);
+        new Stats(1, 1, 1, -1);
     }
 
 

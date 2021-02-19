@@ -18,7 +18,7 @@ public class PlayersConnectionStorage {
     private static PlayersConnectionStorage instance;
 
     private static final Map<SocketChannel, Hero> playersSocketChannelToHero = new LinkedHashMap<>();
-    private static final Map<Integer, Boolean>  playersSymbolsToAvailable = new LinkedHashMap<>();
+    private static final Map<Integer, Boolean> playersSymbolsToAvailable = new LinkedHashMap<>();
 
 
     private PlayersConnectionStorage(int maxNumberOfPlayers) {
@@ -42,6 +42,11 @@ public class PlayersConnectionStorage {
         return playersSocketChannelToHero.keySet();
     }
 
+    /**
+     * Sets the first available symbol to given hero and pairs given socketChannel and hero.
+     *
+     * @throws MaxNumberOfPlayersReachedException if max number of connected players has been reached
+     */
     public void connectPlayer(SocketChannel socketChannel, Hero hero) throws MaxNumberOfPlayersReachedException {
         ArgumentValidator.checkForNullArguments(socketChannel, hero);
 
@@ -55,14 +60,19 @@ public class PlayersConnectionStorage {
         playersSocketChannelToHero.put(socketChannel, hero);
     }
 
+    /**
+     * Removes the pair socketChannel - hero, where hero is the one paired with that socketChannel.
+     * If there is no such pair this method does nothing.
+     */
     public void disconnectPlayerClient(SocketChannel socketChannel) {
         ArgumentValidator.checkForNullArguments(socketChannel);
 
         if (playersSocketChannelToHero.size() <= 0 || !playersSocketChannelToHero.containsKey(socketChannel)) {
-            return ;
+            return;
         }
 
-        playersSymbolsToAvailable.put(playersSocketChannelToHero.get(socketChannel).getSymbolToVisualizeOnMap() - '0', true);
+        playersSymbolsToAvailable
+            .put(playersSocketChannelToHero.get(socketChannel).getSymbolToVisualizeOnMap() - '0', true);
         playersSocketChannelToHero.remove(socketChannel);
     }
 
@@ -78,6 +88,9 @@ public class PlayersConnectionStorage {
         return playersSocketChannelToHero.containsKey(socketChannel);
     }
 
+    /**
+     * Removes all pairs socketChannel - hero if the socketChannel is not connected anymore/closed.
+     */
     public void removePlayersWithInterruptedConnection() {
         for (Map.Entry<SocketChannel, Hero> playerEntry : playersSocketChannelToHero.entrySet()) {
             if (!playerEntry.getKey().isOpen()) {

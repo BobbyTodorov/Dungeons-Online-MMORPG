@@ -3,7 +3,10 @@ package bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.skill;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.validator.ArgumentValidator;
 
-public final class Spell extends BaseSkill{
+public final class Spell extends BaseSkill {
+
+    private final static String LEARN_MESSAGE = "Learned Spell %s Level: %d Damage points: %d, Mana cost: %d";
+
     private final int MANA_COST;
 
     public Spell(String name, int damage, int level, int manaCost) {
@@ -19,7 +22,7 @@ public final class Spell extends BaseSkill{
     }
 
     @Override
-    public String consume(Hero hero) {
+    public String use(Hero hero) {
         ArgumentValidator.checkForNullArguments(hero);
 
         if (hero.getLevel() < this.level) {
@@ -27,8 +30,7 @@ public final class Spell extends BaseSkill{
         }
 
         hero.learn(this);
-        return "Learned Spell " + this.name + " Level: " + this.level +
-            " Damage points: " + this.getDamage() + ", Mana cost: " + getManaCost();
+        return String.format(LEARN_MESSAGE, name, level, getDamage(), getManaCost());
     }
 
     @Override

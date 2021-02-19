@@ -32,17 +32,32 @@ public class Minion extends BaseActor implements IMinion, Visualizable {
         this.spell = spell;
     }
 
+    /**
+     * @param difficultyLevel the difficulty level of the minion to be created
+     * @return instance of a Minion with given difficulty level
+     */
     public static Minion createMinionByDifficultyLevel(MinionDifficultyLevel difficultyLevel) {
         ArgumentValidator.checkForNullArguments(difficultyLevel);
 
         switch (difficultyLevel) {
-            case EASY -> { return createEasyMinion(); }
-            case MEDIUM -> { return createMediumMinion(); }
-            case HARD -> { return createHardMinion(); }
-            default -> { return null; }
+            case EASY -> {
+                return createEasyMinion();
+            }
+            case MEDIUM -> {
+                return createMediumMinion();
+            }
+            case HARD -> {
+                return createHardMinion();
+            }
+            default -> {
+                return null;
+            }
         }
     }
 
+    /**
+     * @return the experience to give when killed
+     */
     @Override
     public int giveExperience() {
         return level * EXPERIENCE_TO_GIVE_PER_LEVEL;

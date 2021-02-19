@@ -11,6 +11,8 @@ public class Logger {
     private static final String FILE_NAME = "log.txt";
     private static final String DATE_FORMAT_PATTERN = "dd-MM-yyyy HH:mm:ss";
 
+    private static final String CANT_INSTANTIATE_LOGGER_EXCEPTION = "Could not instantiate the Logger.";
+
     private final BufferedWriter writer;
     private Date date;
     SimpleDateFormat formatter;
@@ -19,12 +21,12 @@ public class Logger {
 
     private Logger() {
         try {
-            writer = new BufferedWriter(new FileWriter(FILE_NAME));
+            writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
             date = new Date();
             formatter = new SimpleDateFormat(DATE_FORMAT_PATTERN);
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Cannot instantiate Logged", e);
+            throw new RuntimeException(CANT_INSTANTIATE_LOGGER_EXCEPTION, e);
         }
     }
 

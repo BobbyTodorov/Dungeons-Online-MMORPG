@@ -145,7 +145,7 @@ public class PlayersConnectionStorageTest {
 
     @Test
     public void testGetPlayerHeroByHeroSymbol() throws MaxNumberOfPlayersReachedException, IOException {
-        Hero newHero = new Hero("", new Stats(1 , 1, 1, 1));
+        Hero newHero = new Hero("", new Stats(1, 1, 1, 1));
         SocketChannel newSocketChannel = SocketChannel.open();
         testPlayersConnectionStorage.connectPlayer(newSocketChannel, newHero);
         newHero.setSymbolToVisualize(5);

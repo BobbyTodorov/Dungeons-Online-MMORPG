@@ -13,16 +13,20 @@ public final class Stats {
         ArgumentValidator.checkForPositiveArguments(healthPoints);
         ArgumentValidator.checkForNonNegativeArguments(manaPoints, attackPoints, defensePoints);
 
-        this.maxHealthPoints = this.currentHealthPoints =  healthPoints;
+        this.maxHealthPoints = this.currentHealthPoints = healthPoints;
         this.maxManaPoints = this.currentManaPoints = manaPoints;
         this.attackPoints = attackPoints;
         this.defensePoints = defensePoints;
     }
 
 
-    public int getMaxHealth() { return maxHealthPoints; }
+    public int getMaxHealth() {
+        return maxHealthPoints;
+    }
 
-    public int getMaxMana() { return maxManaPoints; }
+    public int getMaxMana() {
+        return maxManaPoints;
+    }
 
     public int getCurrentHealth() {
         return currentHealthPoints;

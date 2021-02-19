@@ -40,6 +40,7 @@ public interface Actor extends Visualizable {
 
     /**
      * Decreases Actor's health by given amount.
+     *
      * @param damagePoints must be positive integer.
      */
     void takeDamage(int damagePoints);

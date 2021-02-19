@@ -14,6 +14,7 @@ public interface IHero extends Actor {
 
     /**
      * Hero gains given amount of experience.
+     *
      * @return
      */
     int gainExperience(int amountOfExperience);
@@ -25,12 +26,14 @@ public interface IHero extends Actor {
 
     /**
      * Hero heals - increases current health by given amount.
+     *
      * @param healingPoints must be positive integer
      */
     void takeHealing(int healingPoints);
 
     /**
      * Hero recharges - increases current mana by given amount.
+     *
      * @param manaPoints must be positive integer
      */
     void takeMana(int manaPoints);

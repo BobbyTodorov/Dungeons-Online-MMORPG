@@ -40,12 +40,12 @@ public class ManaPotionTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCollectWithNullArgument() {
-        testManaPotion.consume(null);
+        testManaPotion.use(null);
     }
 
     @Test
     public void testCollectSuccess() {
-        testManaPotion.consume(testHero);
+        testManaPotion.use(testHero);
 
         verify(testHero).takeMana(50);
     }
