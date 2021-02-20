@@ -1,6 +1,6 @@
 package bg.sofia.uni.fmi.mjt.dungeonsonline.server.gameengine;
 
-import bg.sofia.uni.fmi.mjt.dungeonsonline.server.PlayerCommand;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.playercommands.PlayerCommand;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.attributes.Stats;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.Hero;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.actor.hero.movement.Direction;

@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.dungeonsonline.server;
+package bg.sofia.uni.fmi.mjt.dungeonsonline.server.playercommands;
 
 public enum PlayerCommand {
     START("start"),

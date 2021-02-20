@@ -141,6 +141,7 @@ public class NetworkServer {
     }
 
     private void run() throws IOException {
+        // Currently only one Thread is implicitly receiving from clients (it's enough for now).
         while (isRunning) {
             if (selector.select() == 0) {
                 continue;
@@ -190,7 +191,6 @@ public class NetworkServer {
         clientSocketChannel.register(selector, SelectionKey.OP_READ);
 
         String logString = String.format(SC_CONNECTION_ACCEPTED, clientSocketChannel.getRemoteAddress());
-        System.out.println(logString);
         logger.log(logString);
     }
 }

@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.gameengine.GameEngine;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.ClientRequest;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.MessageType;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.network.NetworkServer;
+import bg.sofia.uni.fmi.mjt.dungeonsonline.server.playercommands.PlayerCommand;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.PlayersConnectionStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.StaticObjectsStorage;
 import bg.sofia.uni.fmi.mjt.dungeonsonline.server.storage.exceptions.MaxNumberOfPlayersReachedException;
@@ -15,9 +16,11 @@ import bg.sofia.uni.fmi.mjt.dungeonsonline.server.treasure.Treasure;
 
 import java.io.IOException;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class DungeonsOnlineServer {
-    private static final int MAX_NUMBER_OF_PLAYERS_CONNECTED = 9;
+    private static final int MAX_NUMBER_OF_PLAYERS = 9;
 
     private static final int PLAYER_STARTING_HEALTH = 100;
     private static final int PLAYER_STARTING_MANA = 100;
@@ -45,7 +48,7 @@ public class DungeonsOnlineServer {
 
     private static final NetworkServer networkServer = NetworkServer.getInstance();
     private static final PlayersConnectionStorage playersConnectionStorage =
-        PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS_CONNECTED);
+        PlayersConnectionStorage.getInstance(MAX_NUMBER_OF_PLAYERS);
 
     private static final GameEngine gameEngine = GameEngine.getInstance();
     private static final StaticObjectsStorage staticObjectStorage = StaticObjectsStorage.getInstance();
@@ -70,6 +73,8 @@ public class DungeonsOnlineServer {
     }
 
     private void run() {
+        ThreadPoolExecutor processor = (ThreadPoolExecutor) Executors.newFixedThreadPool(MAX_NUMBER_OF_PLAYERS);
+
         while (isRunning) {
             ClientRequest playerRequest = networkServer.pollNextClientRequest();
 
@@ -77,13 +82,13 @@ public class DungeonsOnlineServer {
                 continue;
             }
 
-            new Thread(() -> {
+            processor.execute(() -> {
                 try {
                     processPlayerRequest(playerRequest);
                 } catch (IOException ioException) {
-                    throw new RuntimeException("processing player request failed");
+                    throw new RuntimeException("Processing player request failed.");
                 }
-            }).start();
+            });
         }
     }
 
@@ -256,6 +261,8 @@ public class DungeonsOnlineServer {
 
         sendMessageToSocketChannel("", MessageType.DIALOG_END, playerClient);
         if (commandToInteractString.equals(PlayerCommand.ATTACK.toString())) {
+            //TODO sendMessageToSocketChannel("you are being attacked", MessageType.MAP,
+            //playersConnectionStorage);
             return gameEngine.battleWithAnotherHero(initiatorHero, otherHero);
         } else {
             int treasureIndex = getTreasureInBackpackIndexFromPlayer(playerClient);
