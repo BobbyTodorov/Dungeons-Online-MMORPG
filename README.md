@@ -14,7 +14,7 @@ A player can move around the map, interact with treasures they've found (use or 
 fight with other minions/players or trade treasures from their backpack with other players. 
 A player can also open its backpack and perform commands on a choosen treasure from the backpack (e.g. use, drop).
 Killing a minion grants experience to the killer. 
-Killing another player grants experience and forces the dead player to drop a treasure from their backpack (if there is any).
+Killing another player forces the dead player to drop a treasure from their backpack (if there is any).
 
 
 ## Code Explanation
