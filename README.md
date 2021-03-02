@@ -1,6 +1,6 @@
 # Dungeons-Online-MMORPG
 
-##Game Explanation 
+## Game Explanation 
 Dungeons Online is a multiplayer game where players can
 collect treasures (e.g. spells, weapons, health/mana potions), 
 fight minions and interact with other players. 
@@ -17,7 +17,7 @@ A player can also open its backpack and perform commands on a choosen treasure f
 Killing a minion grants experience. Killing another player grants experience and forces the dead player to drop a treasure from
 their backpack (if there is any).
 
-##Code Explanation
+## Code Explanation
 There are several main modules running the server part: Game Engine, Network Server, 
 Map, Players Storage, Static Objects Storage, DungeonsOnline (Main) Server.
 
