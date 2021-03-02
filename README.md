@@ -35,11 +35,11 @@ Map, Players Storage, Static Objects Storage, DungeonsOnline (Main) Server.
 The `Main Server` combines all previous modules and manages the main logic of the game.
 
 
+ 
+ 
 The Server part has its own unit tests (JUnit 4, Mockito).
 
-
-The Client part has nothing but a message receiver (listener) from the server and a message sender to the server.
-
+The Client part has nothing but a message receiver (listener)/sender used to communicate with the server.
 The lack of any business game logic on the client part is intentional.
 
 
