@@ -34,15 +34,19 @@ Map, Players Storage, Static Objects Storage, DungeonsOnline (Main) Server.
 
 The `Main Server` combines all previous modules and manages the main logic of the game.
 
+  
+  
+There is a decent amount of threads working on the server side in order to achieve a non-blocking behavior and faster performance.
 
- 
- 
+The maximum number of players is currently set to 9.
+
 The Server part has its own unit tests (JUnit 4, Mockito).
+
+
 
 The Client part has nothing but a message receiver (listener)/sender used to communicate with the server.
 The lack of any business game logic on the client part is intentional.
 
 
-The maximum number of players is currently set to 9.
+*Written in Java 15 using IntelliJ IDEA.*
 
-There is a decent amount of threads working on the server side in order to achieve a non-blocking behavior and fast performance.
