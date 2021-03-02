@@ -6,27 +6,19 @@ collect treasures (e.g. spells, weapons, health/mana potions),
 fight minions and interact with other players. 
 
 Each Actor (player/minion) has its own name, level, stats (e.g. health/mana/attack/defense points), weapon and spell.
-
 Players in addition have their own experience and backpack (i.e. inventory) where they can store treasures.
-
 Weapons and spells have their own power stats and level (in addition spells have mana cost). 
-
 Equipping/Learning a weapon/spell with higher level than the player's is impossible.
-
 
 A player can move around the map, interact with treasures they've found (use or collect to backpack), 
 fight with other minions/players or trade treasures from their backpack with other players. 
-
 A player can also open its backpack and perform commands on a choosen treasure from the backpack (e.g. use, drop).
-
 Killing a minion grants experience to the killer. 
-
 Killing another player grants experience and forces the dead player to drop a treasure from their backpack (if there is any).
 
 
 ## Code Explanation
 There are several main modules running the server part: Game Engine, Network Server, 
-
 Map, Players Storage, Static Objects Storage, DungeonsOnline (Main) Server.
 
 
