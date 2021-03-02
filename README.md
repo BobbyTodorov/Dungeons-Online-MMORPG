@@ -30,7 +30,7 @@ Map, Players Storage, Static Objects Storage, DungeonsOnline (Main) Server.
 
 `Players Storage` contains information about the players and their connections.
 
-`Static Objects` Storage mantains all static game objects (e.g. treasures, minions).
+`Static Objects Storage` mantains all static game objects (e.g. treasures, minions).
 
 The `Main Server` combines all previous modules and manages the main logic of the game.
 
